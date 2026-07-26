@@ -2,6 +2,7 @@
 
 import { fetchCoinDescription, type AssetDescription, type AssetRef } from "@crypto-stocks/lib";
 import { useEffect, useState } from "react";
+import { Loader } from "../motion/loader";
 
 async function fetchDescription(asset: AssetRef): Promise<AssetDescription> {
   if (asset.kind === "crypto") {
@@ -49,7 +50,12 @@ export function AssetDescriptionPanel({
   return (
     <div className="rounded-xl border border-black/10 p-4 text-sm dark:border-white/15">
       <h3 className="mb-2 font-medium">About {asset.name}</h3>
-      {loading && <p className="text-zinc-500 dark:text-zinc-400">Loading description…</p>}
+      {loading && (
+        <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
+          <Loader variant="dots" size={16} />
+          Loading description…
+        </div>
+      )}
       {errored && !loading && (
         <p className="text-zinc-500 dark:text-zinc-400">Description unavailable right now.</p>
       )}

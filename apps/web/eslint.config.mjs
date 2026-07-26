@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored shadcn/beUI registry components — copy-pasted source we don't
+    // hand-author and that gets overwritten by `shadcn add --overwrite`.
+    "components/ui/**",
+    "components/motion/**",
   ]),
 ]);
 

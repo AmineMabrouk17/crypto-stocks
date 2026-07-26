@@ -2,6 +2,8 @@
 
 import type { AssetRef } from "@crypto-stocks/lib";
 import { useCallback, useEffect, useState } from "react";
+import { AnimatedBadge, type AnimatedBadgeStatus } from "../motion/animated-badge";
+import { NumberTicker } from "../motion/number-ticker";
 import { PriceChart, type PriceChartHandle } from "../chart/PriceChart";
 import { useCryptoKlineStream } from "../chart/useCryptoKlineStream";
 import { useStockPolling } from "../chart/useStockPolling";
@@ -29,6 +31,24 @@ function StockChart({ asset, chart }: { asset: AssetRef; chart: PriceChartHandle
   return <StatusBadge status={status} price={price} />;
 }
 
+const STATUS_TO_BADGE: Record<"connecting" | "open" | "closed", AnimatedBadgeStatus> = {
+  connecting: "loading",
+  open: "success",
+  closed: "danger",
+};
+
+const STATUS_LABEL: Record<"connecting" | "open" | "closed", string> = {
+  connecting: "Connecting",
+  open: "Live",
+  closed: "Disconnected",
+};
+
+function decimalsForPrice(price: number): number {
+  if (price >= 1) return 2;
+  if (price >= 0.01) return 4;
+  return 6;
+}
+
 function StatusBadge({
   status,
   price,
@@ -36,13 +56,35 @@ function StatusBadge({
   status: "connecting" | "open" | "closed";
   price: number | null;
 }) {
-  const dotColor =
-    status === "open" ? "bg-green-500" : status === "connecting" ? "bg-amber-500" : "bg-red-500";
   return (
-    <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-      <span className={`h-2 w-2 rounded-full ${dotColor}`} />
-      {price != null ? `$${price.toLocaleString(undefined, { maximumFractionDigits: 6 })}` : "—"}
-      <span className="text-xs uppercase tracking-wide">{status}</span>
+    <div className="flex items-center gap-3">
+      <span className="text-lg font-medium tabular-nums">
+        {price != null ? (
+          (() => {
+            const decimals = decimalsForPrice(price);
+            const scale = 10 ** decimals;
+            return (
+              <NumberTicker
+                value={Math.round(price * scale)}
+                duration={0.5}
+                stagger={0.02}
+                prefix="$"
+                format={(n) =>
+                  (n / scale).toLocaleString(undefined, {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals,
+                  })
+                }
+              />
+            );
+          })()
+        ) : (
+          "—"
+        )}
+      </span>
+      <AnimatedBadge status={STATUS_TO_BADGE[status]} size="sm" contentKey={status}>
+        {STATUS_LABEL[status]}
+      </AnimatedBadge>
     </div>
   );
 }
