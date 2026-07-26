@@ -1,0 +1,15 @@
+{
+  "name": "crypto-stocks",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "tsc": "turbo run tsc"
+  },
+  "devDependencies": {
+    "turbo": "^2.10.7",
+    "typescript": "^5.6.0"
+  }
+}

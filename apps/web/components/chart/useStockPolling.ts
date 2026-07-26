@@ -1,0 +1,43 @@
+"use client";
+
+import type { Candle } from "@crypto-stocks/lib";
+import { useEffect, useRef } from "react";
+import useSWR from "swr";
+import type { PriceChartHandle } from "./PriceChart";
+
+interface YahooQuoteResponse {
+  price: number | null;
+  currency: string | null;
+  candles: Candle[];
+}
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+export function useStockPolling(symbol: string, chart: PriceChartHandle | null) {
+  const { data, error } = useSWR<YahooQuoteResponse>(
+    `/api/stocks/quote?symbol=${encodeURIComponent(symbol)}`,
+    fetcher,
+    { refreshInterval: 7000, revalidateOnFocus: true },
+  );
+  const seededRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    seededRef.current = null;
+  }, [symbol]);
+
+  useEffect(() => {
+    if (!chart || !data?.candles?.length) return;
+    if (seededRef.current !== symbol) {
+      chart.setData(data.candles);
+      seededRef.current = symbol;
+    } else {
+      const last = data.candles[data.candles.length - 1];
+      if (last) chart.update(last);
+    }
+  }, [chart, data, symbol]);
+
+  return {
+    price: data?.price ?? null,
+    status: error ? ("closed" as const) : data ? ("open" as const) : ("connecting" as const),
+  };
+}
