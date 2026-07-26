@@ -10,23 +10,25 @@ import { useStockPolling } from "../chart/useStockPolling";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
 
 function CryptoChart({ asset, chart }: { asset: AssetRef; chart: PriceChartHandle | null }) {
-  const { setLivePrice } = useSelectedAsset();
-  const { price, status } = useCryptoKlineStream(asset.symbol, chart);
+  const { setLivePrice, setMarketStats } = useSelectedAsset();
+  const { price, stats, status } = useCryptoKlineStream(asset.symbol, chart);
 
   useEffect(() => {
     setLivePrice(price);
-  }, [price, setLivePrice]);
+    setMarketStats(stats);
+  }, [price, stats, setLivePrice, setMarketStats]);
 
   return <StatusBadge status={status} price={price} />;
 }
 
 function StockChart({ asset, chart }: { asset: AssetRef; chart: PriceChartHandle | null }) {
-  const { setLivePrice } = useSelectedAsset();
-  const { price, status } = useStockPolling(asset.symbol, chart);
+  const { setLivePrice, setMarketStats } = useSelectedAsset();
+  const { price, stats, status } = useStockPolling(asset.symbol, chart);
 
   useEffect(() => {
     setLivePrice(price);
-  }, [price, setLivePrice]);
+    setMarketStats(stats);
+  }, [price, stats, setLivePrice, setMarketStats]);
 
   return <StatusBadge status={status} price={price} />;
 }
@@ -58,7 +60,7 @@ function StatusBadge({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-lg font-medium tabular-nums">
+      <span className="font-mono text-lg font-medium tabular-nums">
         {price != null ? (
           (() => {
             const decimals = decimalsForPrice(price);
@@ -98,7 +100,7 @@ export function AssetChartPanel({ asset }: { asset: AssetRef }) {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">
           {asset.name}{" "}
-          <span className="text-sm font-normal text-zinc-500 dark:text-zinc-400">
+          <span className="font-mono text-sm font-normal text-zinc-500 dark:text-zinc-400">
             {asset.symbol}
           </span>
         </h2>

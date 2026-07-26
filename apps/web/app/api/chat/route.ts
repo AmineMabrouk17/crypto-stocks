@@ -1,4 +1,4 @@
-import { generateChatReply, type ChatMessage } from "@crypto-stocks/lib";
+import { generateChatReply, type ChatMessage, type MarketStats } from "@crypto-stocks/lib";
 import { NextResponse } from "next/server";
 
 interface ChatRequestBody {
@@ -9,6 +9,7 @@ interface ChatRequestBody {
     kind: "crypto" | "stock";
   };
   livePrice: number | null;
+  marketStats: MarketStats | null;
   description: string | null;
 }
 
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as ChatRequestBody;
-  const { messages, asset, livePrice, description } = body;
+  const { messages, asset, livePrice, marketStats, description } = body;
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: "messages is required" }, { status: 400 });
@@ -31,12 +32,28 @@ export async function POST(request: Request) {
   const priceLine =
     livePrice != null ? `Current live price: $${livePrice.toLocaleString()}.` : "Live price is currently unavailable.";
 
+  const statsLine =
+    marketStats && (marketStats.changePercent != null || marketStats.high != null)
+      ? [
+          "Live chart data for the currently loaded window:",
+          marketStats.changePercent != null
+            ? `change ${marketStats.changePercent >= 0 ? "+" : ""}${marketStats.changePercent.toFixed(2)}% since session open`
+            : null,
+          marketStats.sessionOpen != null ? `open $${marketStats.sessionOpen.toLocaleString()}` : null,
+          marketStats.high != null ? `high $${marketStats.high.toLocaleString()}` : null,
+          marketStats.low != null ? `low $${marketStats.low.toLocaleString()}` : null,
+        ]
+          .filter(Boolean)
+          .join(", ")
+      : "";
+
   const systemInstruction = [
     "You are a concise financial assistant embedded in a live crypto/stocks dashboard.",
     `The user currently has ${asset.name} (${asset.symbol}, a ${asset.kind === "crypto" ? "cryptocurrency" : "stock/ETF"}) selected.`,
     priceLine,
+    statsLine,
     description ? `Background: ${description}` : "",
-    "Answer questions about this asset using the context above. Keep replies short and plain-text. Make clear you are not providing financial advice.",
+    "Ground your answers about price action and movement in the live chart data above, not general knowledge. Keep replies short and plain-text. Make clear you are not providing financial advice.",
   ]
     .filter(Boolean)
     .join(" ");

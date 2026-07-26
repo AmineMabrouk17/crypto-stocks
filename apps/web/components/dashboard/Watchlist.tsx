@@ -39,7 +39,7 @@ export function Watchlist() {
               >
                 {asset.kind === "crypto" ? "crypto" : "stock"}
               </span>
-              <span className="font-medium">{asset.symbol}</span>
+              <span className="font-mono font-medium">{asset.symbol}</span>
               <span
                 className={`truncate text-xs ${active ? "opacity-80" : "text-zinc-500 dark:text-zinc-400"}`}
               >

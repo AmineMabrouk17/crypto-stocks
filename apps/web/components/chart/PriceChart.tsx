@@ -47,6 +47,7 @@ export function PriceChart({
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
         textColor: isDark ? "#d4d4d8" : "#3f3f46",
+        fontFamily: "var(--font-mono), ui-monospace, monospace",
       },
       grid: {
         vertLines: { color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" },

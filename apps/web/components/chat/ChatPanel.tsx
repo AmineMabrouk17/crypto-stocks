@@ -1,17 +1,20 @@
 "use client";
 
-import type { AssetRef, ChatMessage } from "@crypto-stocks/lib";
+import type { AssetRef, ChatMessage, MarketStats } from "@crypto-stocks/lib";
 import { useEffect, useRef, useState } from "react";
 import { StatefulButton, type ButtonState } from "../motion/button/stateful";
 import { Loader } from "../motion/loader";
+import { TextReveal } from "../motion/text-reveal";
 
 export function ChatPanel({
   asset,
   livePrice,
+  marketStats,
   description,
 }: {
   asset: AssetRef;
   livePrice: number | null;
+  marketStats: MarketStats;
   description: string | null;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -40,6 +43,7 @@ export function ChatPanel({
           messages: nextMessages,
           asset: { name: asset.name, symbol: asset.symbol, kind: asset.kind },
           livePrice,
+          marketStats,
           description,
         }),
       });
@@ -76,7 +80,17 @@ export function ChatPanel({
                 : "bg-black/5 dark:bg-white/10"
             }`}
           >
-            {m.content}
+            {m.role === "assistant" ? (
+              <TextReveal
+                text={m.content}
+                split="word"
+                stagger={0.025}
+                blur={6}
+                yOffset="30%"
+              />
+            ) : (
+              m.content
+            )}
           </div>
         ))}
         {sending && (
