@@ -9,7 +9,7 @@ import { AssetSearchBar } from "./AssetSearchBar";
 import { Watchlist } from "./Watchlist";
 
 export function DashboardGrid() {
-  const { selected, livePrice } = useSelectedAsset();
+  const { selected, livePrice, marketStats } = useSelectedAsset();
   const [description, setDescription] = useState<string | null>(null);
   const assetKey = `${selected.kind}:${selected.symbol}`;
 
@@ -26,7 +26,13 @@ export function DashboardGrid() {
       </main>
 
       <aside className="min-h-[420px] lg:min-h-0">
-        <ChatPanel key={assetKey} asset={selected} livePrice={livePrice} description={description} />
+        <ChatPanel
+          key={assetKey}
+          asset={selected}
+          livePrice={livePrice}
+          marketStats={marketStats}
+          description={description}
+        />
       </aside>
     </div>
   );

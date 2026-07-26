@@ -40,3 +40,11 @@ export interface SearchResult {
   symbol: string;
   name: string;
 }
+
+/** Live stats derived from the currently loaded chart window, for grounding the chat assistant. */
+export interface MarketStats {
+  sessionOpen: number | null;
+  high: number | null;
+  low: number | null;
+  changePercent: number | null;
+}
