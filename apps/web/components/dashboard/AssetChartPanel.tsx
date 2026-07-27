@@ -1,6 +1,6 @@
 "use client";
 
-import type { AssetRef } from "@crypto-stocks/lib";
+import { decimalsForPrice, formatNumber, type AssetRef } from "@crypto-stocks/lib";
 import { useCallback, useEffect, useState } from "react";
 import { AnimatedBadge, type AnimatedBadgeStatus } from "../motion/animated-badge";
 import { NumberTicker } from "../motion/number-ticker";
@@ -45,12 +45,6 @@ const STATUS_LABEL: Record<"connecting" | "open" | "closed", string> = {
   closed: "Disconnected",
 };
 
-function decimalsForPrice(price: number): number {
-  if (price >= 1) return 2;
-  if (price >= 0.01) return 4;
-  return 6;
-}
-
 function StatusBadge({
   status,
   price,
@@ -71,12 +65,7 @@ function StatusBadge({
                 duration={0.5}
                 stagger={0.02}
                 prefix="$"
-                format={(n) =>
-                  (n / scale).toLocaleString(undefined, {
-                    minimumFractionDigits: decimals,
-                    maximumFractionDigits: decimals,
-                  })
-                }
+                format={(n) => formatNumber(n / scale, decimals)}
               />
             );
           })()
