@@ -36,8 +36,12 @@ export interface YahooQuote {
   dayStats: DayStats;
 }
 
-export async function fetchYahooQuote(symbol: string): Promise<YahooQuote> {
-  const url = `${YAHOO_QUERY_BASE}/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1m&range=1d`;
+export async function fetchYahooQuote(
+  symbol: string,
+  range = "1d",
+  interval = "1m",
+): Promise<YahooQuote> {
+  const url = `${YAHOO_QUERY_BASE}/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${interval}&range=${range}`;
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) throw new Error(`Yahoo chart request failed: ${res.status}`);
   const data = await res.json();

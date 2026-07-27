@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
 import { ThemeToggle } from "@/components/motion/theme-toggle";
 
@@ -17,7 +18,9 @@ export default function Home() {
           className="rounded-full border border-black/10 bg-white p-2 dark:border-white/15 dark:bg-zinc-900"
         />
       </header>
-      <DashboardGrid />
+      <Suspense fallback={null}>
+        <DashboardGrid />
+      </Suspense>
     </div>
   );
 }
