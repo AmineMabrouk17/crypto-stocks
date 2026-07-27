@@ -48,3 +48,11 @@ export interface MarketStats {
   low: number | null;
   changePercent: number | null;
 }
+
+/** Official 24h (crypto) / daily (stocks, vs previous close) stats for the header badge. */
+export interface DayStats {
+  changePercent: number | null;
+  high: number | null;
+  low: number | null;
+  volume: number | null;
+}

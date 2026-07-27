@@ -1,5 +1,5 @@
 import { YAHOO_FC_BASE, YAHOO_QUERY_BASE } from "./constants";
-import type { AssetDescription, Candle, SearchResult } from "./types";
+import type { AssetDescription, Candle, DayStats, SearchResult } from "./types";
 
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
@@ -33,6 +33,7 @@ export interface YahooQuote {
   price: number | null;
   currency: string | null;
   candles: Candle[];
+  dayStats: DayStats;
 }
 
 export async function fetchYahooQuote(symbol: string): Promise<YahooQuote> {
@@ -58,10 +59,21 @@ export async function fetchYahooQuote(symbol: string): Promise<YahooQuote> {
         c.open != null && c.high != null && c.low != null && c.close != null,
     );
 
+  const meta = result.meta ?? {};
+  const price: number | null = meta.regularMarketPrice ?? null;
+  const previousClose: number | null = meta.previousClose ?? meta.chartPreviousClose ?? null;
+
   return {
-    price: result.meta?.regularMarketPrice ?? null,
-    currency: result.meta?.currency ?? null,
+    price,
+    currency: meta.currency ?? null,
     candles,
+    dayStats: {
+      changePercent:
+        price != null && previousClose ? ((price - previousClose) / previousClose) * 100 : null,
+      high: meta.regularMarketDayHigh ?? null,
+      low: meta.regularMarketDayLow ?? null,
+      volume: meta.regularMarketVolume ?? null,
+    },
   };
 }
 
