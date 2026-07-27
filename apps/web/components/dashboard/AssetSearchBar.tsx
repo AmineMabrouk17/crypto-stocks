@@ -1,10 +1,11 @@
 "use client";
 
 import type { AssetRef, SearchResult } from "@crypto-stocks/lib";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { filterCoinList, getCoinList } from "@/lib/coinListCache";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
 import { useWatchlist } from "@/lib/useWatchlist";
+import { SharedLayoutBg } from "../motion/shared-layout-bg";
 
 function toAssetRef(result: SearchResult): AssetRef {
   if (result.kind === "crypto") {
@@ -13,9 +14,18 @@ function toAssetRef(result: SearchResult): AssetRef {
   return { kind: "stock", symbol: result.symbol, id: result.symbol, name: result.name };
 }
 
+type CategoryFilter = "all" | "crypto" | "stock";
+
+const CATEGORIES: { value: CategoryFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "crypto", label: "Crypto" },
+  { value: "stock", label: "Stocks" },
+];
+
 export function AssetSearchBar() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [category, setCategory] = useState<CategoryFilter>("all");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -77,6 +87,11 @@ export function AssetSearchBar() {
     setOpen(false);
   };
 
+  const filteredResults = useMemo(
+    () => (category === "all" ? results : results.filter((r) => r.kind === category)),
+    [results, category],
+  );
+
   return (
     <div className="relative">
       <input
@@ -92,14 +107,37 @@ export function AssetSearchBar() {
         className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/30 dark:border-white/15 dark:bg-zinc-900 dark:focus:border-white/30"
       />
       {open && (query.trim().length >= 2) && (
-        <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-black/10 bg-white shadow-lg dark:border-white/15 dark:bg-zinc-900">
-          {loading && results.length === 0 && (
+        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-black/10 bg-white shadow-lg dark:border-white/15 dark:bg-zinc-900">
+          <SharedLayoutBg
+            className="flex-row gap-0 border-b border-black/10 p-1 dark:border-white/15"
+            pillClassName="bg-primary/[0.08] dark:bg-primary/[0.12]"
+            inset={2}
+          >
+            {CATEGORIES.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setCategory(c.value);
+                }}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium ${
+                  category === c.value
+                    ? "bg-foreground text-background"
+                    : "text-zinc-500 dark:text-zinc-400"
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </SharedLayoutBg>
+          {loading && filteredResults.length === 0 && (
             <div className="px-3 py-2 text-xs text-zinc-500">Searching…</div>
           )}
-          {!loading && results.length === 0 && (
+          {!loading && filteredResults.length === 0 && (
             <div className="px-3 py-2 text-xs text-zinc-500">No matches</div>
           )}
-          {results.map((r) => (
+          {filteredResults.map((r) => (
             <button
               key={`${r.kind}:${r.id}`}
               type="button"
