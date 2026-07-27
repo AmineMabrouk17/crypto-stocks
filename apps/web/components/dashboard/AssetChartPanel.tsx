@@ -1,14 +1,25 @@
 "use client";
 
-import { decimalsForPrice, formatCurrency, formatNumber, type AssetRef, type DayStats } from "@crypto-stocks/lib";
+import {
+  decimalsForPrice,
+  formatCurrency,
+  formatNumber,
+  type AssetRef,
+  type ChartRange,
+  type DayStats,
+} from "@crypto-stocks/lib";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useChartRange } from "@/lib/useChartRange";
 import { AnimatedBadge, type AnimatedBadgeStatus } from "../motion/animated-badge";
+import { Loader } from "../motion/loader";
 import { NumberTicker } from "../motion/number-ticker";
+import { ChartRangeSelector } from "../chart/ChartRangeSelector";
 import { PriceChart, type PriceChartHandle } from "../chart/PriceChart";
 import { useCrypto24hStats } from "../chart/useCrypto24hStats";
 import { useCryptoKlineStream } from "../chart/useCryptoKlineStream";
+import { useStockDayStats } from "../chart/useStockDayStats";
 import { useStockPolling } from "../chart/useStockPolling";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
 
@@ -53,9 +64,19 @@ function AssetHeader({
   );
 }
 
-function CryptoChart({ asset, chart }: { asset: AssetRef; chart: PriceChartHandle | null }) {
+function CryptoChart({
+  asset,
+  range,
+  chart,
+  onSeedingChange,
+}: {
+  asset: AssetRef;
+  range: ChartRange;
+  chart: PriceChartHandle | null;
+  onSeedingChange: (seeding: boolean) => void;
+}) {
   const { setLivePrice, setMarketStats } = useSelectedAsset();
-  const { price, stats, status } = useCryptoKlineStream(asset.symbol, chart);
+  const { price, stats, status, seeding } = useCryptoKlineStream(asset.symbol, range, chart);
   const dayStats = useCrypto24hStats(asset.symbol);
 
   useEffect(() => {
@@ -63,17 +84,36 @@ function CryptoChart({ asset, chart }: { asset: AssetRef; chart: PriceChartHandl
     setMarketStats(stats);
   }, [price, stats, setLivePrice, setMarketStats]);
 
+  useEffect(() => {
+    onSeedingChange(seeding);
+  }, [seeding, onSeedingChange]);
+
   return <AssetHeader asset={asset} status={status} price={price} dayStats={dayStats} windowLabel="24h" />;
 }
 
-function StockChart({ asset, chart }: { asset: AssetRef; chart: PriceChartHandle | null }) {
+function StockChart({
+  asset,
+  range,
+  chart,
+  onSeedingChange,
+}: {
+  asset: AssetRef;
+  range: ChartRange;
+  chart: PriceChartHandle | null;
+  onSeedingChange: (seeding: boolean) => void;
+}) {
   const { setLivePrice, setMarketStats } = useSelectedAsset();
-  const { price, stats, dayStats, status } = useStockPolling(asset.symbol, chart);
+  const { price, stats, status, seeding } = useStockPolling(asset.symbol, range, chart);
+  const dayStats = useStockDayStats(asset.symbol);
 
   useEffect(() => {
     setLivePrice(price);
     setMarketStats(stats);
   }, [price, stats, setLivePrice, setMarketStats]);
+
+  useEffect(() => {
+    onSeedingChange(seeding);
+  }, [seeding, onSeedingChange]);
 
   return <AssetHeader asset={asset} status={status} price={price} dayStats={dayStats} windowLabel="Today" />;
 }
@@ -155,16 +195,41 @@ function DayStatsRow({ stats, windowLabel }: { stats: DayStats; windowLabel: str
 
 export function AssetChartPanel({ asset }: { asset: AssetRef }) {
   const [chartHandle, setChartHandle] = useState<PriceChartHandle | null>(null);
+  const [seeding, setSeeding] = useState(true);
+  const { range, setRange } = useChartRange();
   const handleReady = useCallback((handle: PriceChartHandle) => setChartHandle(handle), []);
+  const rangeKey = `${asset.symbol}:${range}`;
 
   return (
     <div className="flex flex-col gap-3">
-      {asset.kind === "crypto" ? (
-        <CryptoChart key={asset.symbol} asset={asset} chart={chartHandle} />
-      ) : (
-        <StockChart key={asset.symbol} asset={asset} chart={chartHandle} />
-      )}
-      <PriceChart onReady={handleReady} />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        {asset.kind === "crypto" ? (
+          <CryptoChart
+            key={rangeKey}
+            asset={asset}
+            range={range}
+            chart={chartHandle}
+            onSeedingChange={setSeeding}
+          />
+        ) : (
+          <StockChart
+            key={rangeKey}
+            asset={asset}
+            range={range}
+            chart={chartHandle}
+            onSeedingChange={setSeeding}
+          />
+        )}
+      </div>
+      <ChartRangeSelector range={range} onChange={setRange} />
+      <div className="relative">
+        {seeding && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/60 backdrop-blur-sm dark:bg-zinc-950/60">
+            <Loader variant="dots" size={28} />
+          </div>
+        )}
+        <PriceChart onReady={handleReady} timeVisible={range === "1D" || range === "1W"} />
+      </div>
     </div>
   );
 }
