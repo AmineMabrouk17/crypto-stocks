@@ -1,5 +1,5 @@
 import { BINANCE_REST_BASE, BINANCE_WS_BASE } from "./constants";
-import type { Candle } from "./types";
+import type { Candle, DayStats } from "./types";
 
 type RawKline = [
   number, // open time
@@ -27,6 +27,19 @@ export async function fetchKlines(
     low: Number(k[3]),
     close: Number(k[4]),
   }));
+}
+
+export async function fetchTicker24hr(symbol: string): Promise<DayStats> {
+  const url = `${BINANCE_REST_BASE}/api/v3/ticker/24hr?symbol=${symbol}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Binance 24hr ticker request failed: ${res.status}`);
+  const data = await res.json();
+  return {
+    changePercent: data.priceChangePercent != null ? Number(data.priceChangePercent) : null,
+    high: data.highPrice != null ? Number(data.highPrice) : null,
+    low: data.lowPrice != null ? Number(data.lowPrice) : null,
+    volume: data.volume != null ? Number(data.volume) : null,
+  };
 }
 
 export function klineStreamUrl(symbol: string, interval = "1m"): string {

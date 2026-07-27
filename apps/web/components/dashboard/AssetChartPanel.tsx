@@ -1,36 +1,67 @@
 "use client";
 
-import type { AssetRef } from "@crypto-stocks/lib";
+import type { AssetRef, DayStats } from "@crypto-stocks/lib";
 import { useCallback, useEffect, useState } from "react";
 import { AnimatedBadge, type AnimatedBadgeStatus } from "../motion/animated-badge";
 import { NumberTicker } from "../motion/number-ticker";
 import { PriceChart, type PriceChartHandle } from "../chart/PriceChart";
+import { useCrypto24hStats } from "../chart/useCrypto24hStats";
 import { useCryptoKlineStream } from "../chart/useCryptoKlineStream";
 import { useStockPolling } from "../chart/useStockPolling";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
 
+function AssetHeader({
+  asset,
+  status,
+  price,
+  dayStats,
+  windowLabel,
+}: {
+  asset: AssetRef;
+  status: "connecting" | "open" | "closed";
+  price: number | null;
+  dayStats: DayStats;
+  windowLabel: string;
+}) {
+  return (
+    <div className="flex items-start justify-between">
+      <div>
+        <h2 className="text-lg font-semibold">
+          {asset.name}{" "}
+          <span className="font-mono text-sm font-normal text-zinc-500 dark:text-zinc-400">
+            {asset.symbol}
+          </span>
+        </h2>
+        <DayStatsRow stats={dayStats} windowLabel={windowLabel} />
+      </div>
+      <StatusBadge status={status} price={price} />
+    </div>
+  );
+}
+
 function CryptoChart({ asset, chart }: { asset: AssetRef; chart: PriceChartHandle | null }) {
   const { setLivePrice, setMarketStats } = useSelectedAsset();
   const { price, stats, status } = useCryptoKlineStream(asset.symbol, chart);
+  const dayStats = useCrypto24hStats(asset.symbol);
 
   useEffect(() => {
     setLivePrice(price);
     setMarketStats(stats);
   }, [price, stats, setLivePrice, setMarketStats]);
 
-  return <StatusBadge status={status} price={price} />;
+  return <AssetHeader asset={asset} status={status} price={price} dayStats={dayStats} windowLabel="24h" />;
 }
 
 function StockChart({ asset, chart }: { asset: AssetRef; chart: PriceChartHandle | null }) {
   const { setLivePrice, setMarketStats } = useSelectedAsset();
-  const { price, stats, status } = useStockPolling(asset.symbol, chart);
+  const { price, stats, dayStats, status } = useStockPolling(asset.symbol, chart);
 
   useEffect(() => {
     setLivePrice(price);
     setMarketStats(stats);
   }, [price, stats, setLivePrice, setMarketStats]);
 
-  return <StatusBadge status={status} price={price} />;
+  return <AssetHeader asset={asset} status={status} price={price} dayStats={dayStats} windowLabel="Today" />;
 }
 
 const STATUS_TO_BADGE: Record<"connecting" | "open" | "closed", AnimatedBadgeStatus> = {
@@ -49,6 +80,20 @@ function decimalsForPrice(price: number): number {
   if (price >= 1) return 2;
   if (price >= 0.01) return 4;
   return 6;
+}
+
+function formatAmount(amount: number): string {
+  return amount.toLocaleString("en-US", {
+    minimumFractionDigits: decimalsForPrice(amount),
+    maximumFractionDigits: decimalsForPrice(amount),
+  });
+}
+
+function formatVolume(volume: number): string {
+  if (volume >= 1_000_000_000) return `${(volume / 1_000_000_000).toFixed(2)}B`;
+  if (volume >= 1_000_000) return `${(volume / 1_000_000).toFixed(2)}M`;
+  if (volume >= 1_000) return `${(volume / 1_000).toFixed(2)}K`;
+  return volume.toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
 function StatusBadge({
@@ -72,7 +117,7 @@ function StatusBadge({
                 stagger={0.02}
                 prefix="$"
                 format={(n) =>
-                  (n / scale).toLocaleString(undefined, {
+                  (n / scale).toLocaleString("en-US", {
                     minimumFractionDigits: decimals,
                     maximumFractionDigits: decimals,
                   })
@@ -91,25 +136,38 @@ function StatusBadge({
   );
 }
 
+function DayStatsRow({ stats, windowLabel }: { stats: DayStats; windowLabel: string }) {
+  const hasAny = stats.changePercent != null || stats.high != null || stats.low != null;
+  if (!hasAny) return null;
+
+  const positive = (stats.changePercent ?? 0) >= 0;
+
+  return (
+    <div className="font-mono mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
+      {stats.changePercent != null && (
+        <span className={positive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+          {positive ? "+" : ""}
+          {stats.changePercent.toFixed(2)}% ({windowLabel})
+        </span>
+      )}
+      {stats.high != null && <span>High ${formatAmount(stats.high)}</span>}
+      {stats.low != null && <span>Low ${formatAmount(stats.low)}</span>}
+      {stats.volume != null && <span>Vol {formatVolume(stats.volume)}</span>}
+    </div>
+  );
+}
+
 export function AssetChartPanel({ asset }: { asset: AssetRef }) {
   const [chartHandle, setChartHandle] = useState<PriceChartHandle | null>(null);
   const handleReady = useCallback((handle: PriceChartHandle) => setChartHandle(handle), []);
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">
-          {asset.name}{" "}
-          <span className="font-mono text-sm font-normal text-zinc-500 dark:text-zinc-400">
-            {asset.symbol}
-          </span>
-        </h2>
-        {asset.kind === "crypto" ? (
-          <CryptoChart key={asset.symbol} asset={asset} chart={chartHandle} />
-        ) : (
-          <StockChart key={asset.symbol} asset={asset} chart={chartHandle} />
-        )}
-      </div>
+      {asset.kind === "crypto" ? (
+        <CryptoChart key={asset.symbol} asset={asset} chart={chartHandle} />
+      ) : (
+        <StockChart key={asset.symbol} asset={asset} chart={chartHandle} />
+      )}
       <PriceChart onReady={handleReady} />
     </div>
   );

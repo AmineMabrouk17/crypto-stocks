@@ -1,14 +1,17 @@
 "use client";
 
-import type { Candle, MarketStats } from "@crypto-stocks/lib";
+import type { Candle, DayStats, MarketStats } from "@crypto-stocks/lib";
 import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 import type { PriceChartHandle } from "./PriceChart";
+
+const EMPTY_DAY_STATS: DayStats = { changePercent: null, high: null, low: null, volume: null };
 
 interface YahooQuoteResponse {
   price: number | null;
   currency: string | null;
   candles: Candle[];
+  dayStats: DayStats;
 }
 
 function computeStats(data: YahooQuoteResponse | undefined): MarketStats {
@@ -57,6 +60,7 @@ export function useStockPolling(symbol: string, chart: PriceChartHandle | null) 
   return {
     price: data?.price ?? null,
     stats,
+    dayStats: data?.dayStats ?? EMPTY_DAY_STATS,
     status: error ? ("closed" as const) : data ? ("open" as const) : ("connecting" as const),
   };
 }
