@@ -1,7 +1,7 @@
 "use client";
 
 import type { AssetRef, ChatMessage, MarketStats } from "@crypto-stocks/lib";
-import { Sparkles } from "lucide-react";
+import { PanelRightClose, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { AnimatedBadge } from "../motion/animated-badge";
 import { StatefulButton, type ButtonState } from "../motion/button/stateful";
@@ -13,11 +13,13 @@ export function ChatPanel({
   livePrice,
   marketStats,
   description,
+  onCollapse,
 }: {
   asset: AssetRef;
   livePrice: number | null;
   marketStats: MarketStats;
   description: string | null;
+  onCollapse?: () => void;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -66,9 +68,22 @@ export function ChatPanel({
     <div className="flex h-full flex-col rounded-xl border border-black/10 dark:border-white/15">
       <div className="flex items-center justify-between border-b border-black/10 px-4 py-2 dark:border-white/15">
         <span className="text-sm font-medium">Ask about {asset.symbol}</span>
-        <AnimatedBadge status="info" size="sm" icon={<Sparkles className="h-3.5 w-3.5" />}>
-          Gemini Flash
-        </AnimatedBadge>
+        <div className="flex items-center gap-2">
+          <AnimatedBadge status="info" size="sm" icon={<Sparkles className="h-3.5 w-3.5" />}>
+            Gemini Flash
+          </AnimatedBadge>
+          {onCollapse && (
+            <button
+              type="button"
+              onClick={onCollapse}
+              aria-label="Collapse AI assistant panel"
+              title="Collapse AI assistant"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/10"
+            >
+              <PanelRightClose className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
       <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto px-4 py-3 text-sm">
         {messages.length === 0 && (
