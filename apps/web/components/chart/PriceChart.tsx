@@ -24,6 +24,7 @@ function toCandlestickData(c: Candle): CandlestickData {
 export interface PriceChartHandle {
   setData: (candles: Candle[]) => void;
   update: (candle: Candle) => void;
+  getData: () => Candle[];
 }
 
 export function PriceChart({
@@ -37,6 +38,7 @@ export function PriceChart({
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const candlesRef = useRef<Candle[]>([]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -71,8 +73,18 @@ export function PriceChart({
     seriesRef.current = series;
 
     onReady({
-      setData: (candles) => series.setData(candles.map(toCandlestickData)),
-      update: (candle) => series.update(toCandlestickData(candle)),
+      setData: (candles) => {
+        candlesRef.current = candles;
+        series.setData(candles.map(toCandlestickData));
+      },
+      update: (candle) => {
+        const current = candlesRef.current;
+        const last = current[current.length - 1];
+        candlesRef.current =
+          last && last.time === candle.time ? [...current.slice(0, -1), candle] : [...current, candle];
+        series.update(toCandlestickData(candle));
+      },
+      getData: () => candlesRef.current,
     });
 
     const resizeObserver = new ResizeObserver((entries) => {
