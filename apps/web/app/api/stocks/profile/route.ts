@@ -9,7 +9,10 @@ export async function GET(request: Request) {
 
   try {
     const description = await fetchYahooDescription(symbol);
-    return NextResponse.json(description);
+    // Company profiles/descriptions almost never change — cache for an hour at the edge.
+    return NextResponse.json(description, {
+      headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to fetch profile" },

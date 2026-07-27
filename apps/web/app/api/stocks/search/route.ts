@@ -9,7 +9,11 @@ export async function GET(request: Request) {
 
   try {
     const results = await searchYahoo(q);
-    return NextResponse.json({ results });
+    // Ticker search results change rarely — cache for a few minutes at the edge.
+    return NextResponse.json(
+      { results },
+      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600" } },
+    );
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Search failed", results: [] },
