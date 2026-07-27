@@ -4,6 +4,7 @@ import { PanelRightOpen } from "lucide-react";
 import { useState } from "react";
 import { useChatCollapsed } from "@/lib/useChatCollapsed";
 import { AssetDescriptionPanel } from "../asset/AssetDescriptionPanel";
+import { NewsFeed } from "../asset/NewsFeed";
 import { ChatPanel } from "../chat/ChatPanel";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
 import { AssetChartPanel } from "./AssetChartPanel";
@@ -29,7 +30,8 @@ export function DashboardGrid() {
 
       <main className="flex flex-col gap-4">
         <AssetChartPanel asset={selected} />
-        <AssetDescriptionPanel key={assetKey} asset={selected} onLoaded={setDescription} />
+        <AssetDescriptionPanel key={`desc-${assetKey}`} asset={selected} onLoaded={setDescription} />
+        <NewsFeed key={`news-${assetKey}`} asset={selected} />
       </main>
 
       {collapsed ? (

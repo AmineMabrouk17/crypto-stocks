@@ -12,6 +12,8 @@ export const YAHOO_FC_BASE = "https://fc.yahoo.com";
 export const GEMINI_MODEL = "gemini-flash-latest";
 export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
+export const GOOGLE_NEWS_RSS_BASE = "https://news.google.com/rss/search";
+
 export const DEFAULT_WATCHLIST: AssetRef[] = [
   { kind: "crypto", symbol: "BTCUSDT", id: "bitcoin", name: "Bitcoin" },
   { kind: "crypto", symbol: "ETHUSDT", id: "ethereum", name: "Ethereum" },
