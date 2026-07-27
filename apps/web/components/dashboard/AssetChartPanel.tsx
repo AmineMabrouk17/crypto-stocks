@@ -22,6 +22,7 @@ import { useCryptoKlineStream } from "../chart/useCryptoKlineStream";
 import { useStockDayStats } from "../chart/useStockDayStats";
 import { useStockPolling } from "../chart/useStockPolling";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
+import { PriceAlertPanel } from "./PriceAlertPanel";
 
 function AssetHeader({
   asset,
@@ -58,6 +59,7 @@ function AssetHeader({
           </Link>
         </h2>
         <DayStatsRow stats={dayStats} windowLabel={windowLabel} />
+        <PriceAlertPanel asset={asset} price={price} />
       </div>
       <StatusBadge status={status} price={price} />
     </div>
