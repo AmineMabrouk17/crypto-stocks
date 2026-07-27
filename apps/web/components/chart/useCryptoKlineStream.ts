@@ -1,16 +1,28 @@
 "use client";
 
-import { fetchKlines, klineStreamUrl, parseKlineMessage, type MarketStats } from "@crypto-stocks/lib";
+import {
+  binanceRangeConfig,
+  fetchKlines,
+  klineStreamUrl,
+  parseKlineMessage,
+  type ChartRange,
+  type MarketStats,
+} from "@crypto-stocks/lib";
 import { useEffect, useRef, useState } from "react";
 import type { PriceChartHandle } from "./PriceChart";
 
 const MAX_BACKOFF_MS = 30_000;
 const EMPTY_STATS: MarketStats = { sessionOpen: null, high: null, low: null, changePercent: null };
 
-export function useCryptoKlineStream(symbol: string, chart: PriceChartHandle | null) {
+export function useCryptoKlineStream(
+  symbol: string,
+  range: ChartRange,
+  chart: PriceChartHandle | null,
+) {
   const [price, setPrice] = useState<number | null>(null);
   const [stats, setStats] = useState<MarketStats>(EMPTY_STATS);
   const [status, setStatus] = useState<"connecting" | "open" | "closed">("connecting");
+  const [seeding, setSeeding] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
   const backoffRef = useRef(1000);
   const closedByEffectRef = useRef(false);
@@ -32,13 +44,14 @@ export function useCryptoKlineStream(symbol: string, chart: PriceChartHandle | n
     if (!chart) return;
     closedByEffectRef.current = false;
     backoffRef.current = 1000;
+    const { interval, limit } = binanceRangeConfig(range);
 
     let cancelled = false;
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
     async function seedAndConnect() {
       try {
-        const candles = await fetchKlines(symbol, "1m", 500);
+        const candles = await fetchKlines(symbol, interval, limit);
         if (cancelled) return;
         chart!.setData(candles);
         const first = candles[0];
@@ -52,13 +65,15 @@ export function useCryptoKlineStream(symbol: string, chart: PriceChartHandle | n
         }
       } catch {
         // seeding failure is non-fatal; the WS stream will still populate the chart going forward
+      } finally {
+        if (!cancelled) setSeeding(false);
       }
       connect();
     }
 
     function connect() {
       if (cancelled) return;
-      const ws = new WebSocket(klineStreamUrl(symbol, "1m"));
+      const ws = new WebSocket(klineStreamUrl(symbol, interval));
       wsRef.current = ws;
 
       ws.onopen = () => {
@@ -106,7 +121,7 @@ export function useCryptoKlineStream(symbol: string, chart: PriceChartHandle | n
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [symbol, chart]);
+  }, [symbol, range, chart]);
 
-  return { price, stats, status };
+  return { price, stats, status, seeding };
 }
