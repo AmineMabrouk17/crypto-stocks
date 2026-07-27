@@ -28,6 +28,20 @@ export interface ChatMessage {
   content: string;
 }
 
+/** Which LLM backend powers the chat assistant. "gemini"/"openai"/"anthropic" hit each provider's
+ * official API; "custom" hits any OpenAI-compatible endpoint at a user-supplied base URL. */
+export type LlmProvider = "gemini" | "openai" | "anthropic" | "custom";
+
+/** A user's Bring-Your-Own-Key chat settings. Persisted client-side only (localStorage) — never
+ * sent to or stored by our server beyond the lifetime of a single proxied request. */
+export interface LlmSettings {
+  provider: LlmProvider;
+  apiKey: string;
+  model: string;
+  /** Only used when provider is "custom" — base URL of an OpenAI-compatible API. */
+  customBaseUrl?: string;
+}
+
 export interface CoinListEntry {
   id: string;
   symbol: string;
