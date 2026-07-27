@@ -1,6 +1,6 @@
 "use client";
 
-import type { AssetRef, DayStats } from "@crypto-stocks/lib";
+import { decimalsForPrice, formatCurrency, formatNumber, type AssetRef, type DayStats } from "@crypto-stocks/lib";
 import { useCallback, useEffect, useState } from "react";
 import { AnimatedBadge, type AnimatedBadgeStatus } from "../motion/animated-badge";
 import { NumberTicker } from "../motion/number-ticker";
@@ -76,19 +76,6 @@ const STATUS_LABEL: Record<"connecting" | "open" | "closed", string> = {
   closed: "Disconnected",
 };
 
-function decimalsForPrice(price: number): number {
-  if (price >= 1) return 2;
-  if (price >= 0.01) return 4;
-  return 6;
-}
-
-function formatAmount(amount: number): string {
-  return amount.toLocaleString("en-US", {
-    minimumFractionDigits: decimalsForPrice(amount),
-    maximumFractionDigits: decimalsForPrice(amount),
-  });
-}
-
 function formatVolume(volume: number): string {
   if (volume >= 1_000_000_000) return `${(volume / 1_000_000_000).toFixed(2)}B`;
   if (volume >= 1_000_000) return `${(volume / 1_000_000).toFixed(2)}M`;
@@ -116,12 +103,7 @@ function StatusBadge({
                 duration={0.5}
                 stagger={0.02}
                 prefix="$"
-                format={(n) =>
-                  (n / scale).toLocaleString("en-US", {
-                    minimumFractionDigits: decimals,
-                    maximumFractionDigits: decimals,
-                  })
-                }
+                format={(n) => formatNumber(n / scale, decimals)}
               />
             );
           })()
@@ -150,8 +132,8 @@ function DayStatsRow({ stats, windowLabel }: { stats: DayStats; windowLabel: str
           {stats.changePercent.toFixed(2)}% ({windowLabel})
         </span>
       )}
-      {stats.high != null && <span>High ${formatAmount(stats.high)}</span>}
-      {stats.low != null && <span>Low ${formatAmount(stats.low)}</span>}
+      {stats.high != null && <span>High {formatCurrency(stats.high)}</span>}
+      {stats.low != null && <span>Low {formatCurrency(stats.low)}</span>}
       {stats.volume != null && <span>Vol {formatVolume(stats.volume)}</span>}
     </div>
   );

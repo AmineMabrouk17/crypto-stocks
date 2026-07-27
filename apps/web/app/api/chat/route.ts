@@ -1,4 +1,4 @@
-import { generateChatReply, type ChatMessage, type MarketStats } from "@crypto-stocks/lib";
+import { formatCurrency, generateChatReply, type ChatMessage, type MarketStats } from "@crypto-stocks/lib";
 import { NextResponse } from "next/server";
 
 interface ChatRequestBody {
@@ -30,7 +30,9 @@ export async function POST(request: Request) {
   }
 
   const priceLine =
-    livePrice != null ? `Current live price: $${livePrice.toLocaleString()}.` : "Live price is currently unavailable.";
+    livePrice != null
+      ? `Current live price: ${formatCurrency(livePrice)}.`
+      : "Live price is currently unavailable.";
 
   const statsLine =
     marketStats && (marketStats.changePercent != null || marketStats.high != null)
@@ -39,9 +41,9 @@ export async function POST(request: Request) {
           marketStats.changePercent != null
             ? `change ${marketStats.changePercent >= 0 ? "+" : ""}${marketStats.changePercent.toFixed(2)}% since session open`
             : null,
-          marketStats.sessionOpen != null ? `open $${marketStats.sessionOpen.toLocaleString()}` : null,
-          marketStats.high != null ? `high $${marketStats.high.toLocaleString()}` : null,
-          marketStats.low != null ? `low $${marketStats.low.toLocaleString()}` : null,
+          marketStats.sessionOpen != null ? `open ${formatCurrency(marketStats.sessionOpen)}` : null,
+          marketStats.high != null ? `high ${formatCurrency(marketStats.high)}` : null,
+          marketStats.low != null ? `low ${formatCurrency(marketStats.low)}` : null,
         ]
           .filter(Boolean)
           .join(", ")
