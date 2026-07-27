@@ -3,10 +3,18 @@
 import type { AssetRef, ChatMessage, MarketStats } from "@crypto-stocks/lib";
 import { PanelRightClose, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useLlmSettings } from "@/lib/useLlmSettings";
 import { AnimatedBadge } from "../motion/animated-badge";
 import { StatefulButton, type ButtonState } from "../motion/button/stateful";
 import { Loader } from "../motion/loader";
 import { TextReveal } from "../motion/text-reveal";
+
+const PROVIDER_BADGE_LABELS: Record<string, string> = {
+  gemini: "Gemini",
+  openai: "OpenAI",
+  anthropic: "Anthropic",
+  custom: "Custom",
+};
 
 export function ChatPanel({
   asset,
@@ -25,6 +33,11 @@ export function ChatPanel({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { settings: llmSettings } = useLlmSettings();
+
+  const badgeLabel = llmSettings
+    ? `${PROVIDER_BADGE_LABELS[llmSettings.provider] ?? llmSettings.provider} · ${llmSettings.model}`
+    : "Gemini Flash";
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -49,6 +62,7 @@ export function ChatPanel({
           livePrice,
           marketStats,
           description,
+          llmSettings,
         }),
       });
       const data = await res.json();
@@ -70,7 +84,7 @@ export function ChatPanel({
         <span className="text-sm font-medium">Ask about {asset.symbol}</span>
         <div className="flex items-center gap-2">
           <AnimatedBadge status="info" size="sm" icon={<Sparkles className="h-3.5 w-3.5" />}>
-            Gemini Flash
+            {badgeLabel}
           </AnimatedBadge>
           {onCollapse && (
             <button

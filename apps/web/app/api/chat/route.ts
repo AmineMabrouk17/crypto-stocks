@@ -1,4 +1,13 @@
-import { formatCurrency, generateChatReply, type ChatMessage, type MarketStats } from "@crypto-stocks/lib";
+import {
+  formatCurrency,
+  generateChatReply,
+  generateChatReplyAnthropic,
+  generateChatReplyOpenAI,
+  OPENAI_API_BASE,
+  type ChatMessage,
+  type LlmSettings,
+  type MarketStats,
+} from "@crypto-stocks/lib";
 import { NextResponse } from "next/server";
 
 interface ChatRequestBody {
@@ -11,19 +20,14 @@ interface ChatRequestBody {
   livePrice: number | null;
   marketStats: MarketStats | null;
   description: string | null;
+  /** Optional BYOK settings from the client. When present, the request is routed to the
+   * user's chosen provider using their own key instead of the server's default Gemini key. */
+  llmSettings?: LlmSettings | null;
 }
 
 export async function POST(request: Request) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "GEMINI_API_KEY is not configured on the server" },
-      { status: 500 },
-    );
-  }
-
   const body = (await request.json()) as ChatRequestBody;
-  const { messages, asset, livePrice, marketStats, description } = body;
+  const { messages, asset, livePrice, marketStats, description, llmSettings } = body;
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: "messages is required" }, { status: 400 });
@@ -61,7 +65,62 @@ export async function POST(request: Request) {
     .join(" ");
 
   try {
-    const reply = await generateChatReply(apiKey, systemInstruction, messages);
+    let reply: string;
+
+    // BYOK path: the user supplied their own provider + key from the settings panel. This
+    // request is a stateless passthrough — the key is used for exactly this call and never
+    // logged, echoed back, or persisted server-side.
+    if (llmSettings?.apiKey) {
+      switch (llmSettings.provider) {
+        case "openai":
+          reply = await generateChatReplyOpenAI(
+            llmSettings.apiKey,
+            OPENAI_API_BASE,
+            llmSettings.model,
+            systemInstruction,
+            messages,
+          );
+          break;
+        case "anthropic":
+          reply = await generateChatReplyAnthropic(
+            llmSettings.apiKey,
+            llmSettings.model,
+            systemInstruction,
+            messages,
+          );
+          break;
+        case "custom":
+          if (!llmSettings.customBaseUrl) {
+            return NextResponse.json(
+              { error: "customBaseUrl is required for the custom provider" },
+              { status: 400 },
+            );
+          }
+          reply = await generateChatReplyOpenAI(
+            llmSettings.apiKey,
+            llmSettings.customBaseUrl,
+            llmSettings.model,
+            systemInstruction,
+            messages,
+          );
+          break;
+        case "gemini":
+        default:
+          reply = await generateChatReply(llmSettings.apiKey, systemInstruction, messages);
+          break;
+      }
+    } else {
+      // Default path: no BYOK settings — use the app's server-side Gemini key.
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return NextResponse.json(
+          { error: "GEMINI_API_KEY is not configured on the server" },
+          { status: 500 },
+        );
+      }
+      reply = await generateChatReply(apiKey, systemInstruction, messages);
+    }
+
     return NextResponse.json({ reply });
   } catch (error) {
     return NextResponse.json(
