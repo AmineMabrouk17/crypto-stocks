@@ -5,10 +5,11 @@ import {
   formatCurrency,
   formatNumber,
   type AssetRef,
+  type Candle,
   type ChartRange,
   type DayStats,
 } from "@crypto-stocks/lib";
-import { ExternalLink } from "lucide-react";
+import { Download, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useChartRange } from "@/lib/useChartRange";
@@ -193,12 +194,41 @@ function DayStatsRow({ stats, windowLabel }: { stats: DayStats; windowLabel: str
   );
 }
 
+function downloadTextFile(filename: string, content: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function exportCandlesToCsv(asset: AssetRef, range: ChartRange, candles: Candle[]) {
+  const header = "Time,Open,High,Low,Close";
+  const rows = candles.map((c) => {
+    const iso = new Date(c.time * 1000).toISOString();
+    return `${iso},${c.open},${c.high},${c.low},${c.close}`;
+  });
+  const csv = [header, ...rows].join("\n");
+  downloadTextFile(`${asset.symbol}_${range}.csv`, csv, "text/csv;charset=utf-8;");
+}
+
 export function AssetChartPanel({ asset }: { asset: AssetRef }) {
   const [chartHandle, setChartHandle] = useState<PriceChartHandle | null>(null);
   const [seeding, setSeeding] = useState(true);
   const { range, setRange } = useChartRange();
   const handleReady = useCallback((handle: PriceChartHandle) => setChartHandle(handle), []);
   const rangeKey = `${asset.symbol}:${range}`;
+
+  const handleExportCsv = useCallback(() => {
+    if (!chartHandle) return;
+    const candles = chartHandle.getData();
+    if (candles.length === 0) return;
+    exportCandlesToCsv(asset, range, candles);
+  }, [chartHandle, asset, range]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -221,7 +251,19 @@ export function AssetChartPanel({ asset }: { asset: AssetRef }) {
           />
         )}
       </div>
-      <ChartRangeSelector range={range} onChange={setRange} />
+      <div className="flex items-center justify-between gap-2">
+        <ChartRangeSelector range={range} onChange={setRange} />
+        <button
+          type="button"
+          onClick={handleExportCsv}
+          disabled={!chartHandle}
+          aria-label={`Export ${asset.symbol} chart data as CSV`}
+          title="Export CSV"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-400 dark:hover:bg-white/10"
+        >
+          <Download className="h-3.5 w-3.5" />
+        </button>
+      </div>
       <div className="relative">
         {seeding && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/60 backdrop-blur-sm dark:bg-zinc-950/60">
