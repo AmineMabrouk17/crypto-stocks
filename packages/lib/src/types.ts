@@ -56,3 +56,12 @@ export interface DayStats {
   low: number | null;
   volume: number | null;
 }
+
+export interface NewsArticle {
+  title: string;
+  link: string;
+  source: string | null;
+  publishedAt: string | null;
+  /** Lightweight keyword-heuristic tag, not real sentiment analysis. */
+  sentiment?: "positive" | "negative" | "neutral";
+}
