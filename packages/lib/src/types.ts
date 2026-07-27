@@ -71,6 +71,21 @@ export interface DayStats {
   volume: number | null;
 }
 
+/**
+ * A user-defined target-price trigger. Evaluated only while its asset is the
+ * one currently selected/streaming in the dashboard (see usePriceAlerts).
+ */
+export interface PriceAlert {
+  id: string;
+  assetKind: AssetKind;
+  assetSymbol: string;
+  assetName: string;
+  targetPrice: number;
+  direction: "above" | "below";
+  createdAt: number;
+  triggeredAt: number | null;
+}
+
 export interface NewsArticle {
   title: string;
   link: string;

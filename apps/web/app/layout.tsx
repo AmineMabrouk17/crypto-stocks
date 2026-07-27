@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { PriceAlertWatcher } from "@/components/dashboard/PriceAlertWatcher";
 import { SelectedAssetProvider } from "@/components/providers/SelectedAssetContext";
 import "./globals.css";
 
@@ -32,7 +33,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SelectedAssetProvider>{children}</SelectedAssetProvider>
+          <SelectedAssetProvider>
+            <PriceAlertWatcher />
+            {children}
+          </SelectedAssetProvider>
         </ThemeProvider>
       </body>
     </html>
