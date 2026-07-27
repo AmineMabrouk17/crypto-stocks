@@ -1,7 +1,9 @@
 "use client";
 
 import type { AssetRef, ChatMessage, MarketStats } from "@crypto-stocks/lib";
+import { Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { AnimatedBadge } from "../motion/animated-badge";
 import { StatefulButton, type ButtonState } from "../motion/button/stateful";
 import { Loader } from "../motion/loader";
 import { TextReveal } from "../motion/text-reveal";
@@ -62,8 +64,11 @@ export function ChatPanel({
 
   return (
     <div className="flex h-full flex-col rounded-xl border border-black/10 dark:border-white/15">
-      <div className="border-b border-black/10 px-4 py-2 text-sm font-medium dark:border-white/15">
-        Ask about {asset.symbol}
+      <div className="flex items-center justify-between border-b border-black/10 px-4 py-2 dark:border-white/15">
+        <span className="text-sm font-medium">Ask about {asset.symbol}</span>
+        <AnimatedBadge status="info" size="sm" icon={<Sparkles className="h-3.5 w-3.5" />}>
+          Gemini Flash
+        </AnimatedBadge>
       </div>
       <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto px-4 py-3 text-sm">
         {messages.length === 0 && (
