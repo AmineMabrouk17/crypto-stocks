@@ -8,3 +8,4 @@ export * from "./yahooFinance";
 export * from "./gemini";
 export * from "./openai";
 export * from "./anthropic";
+export * from "./news";
