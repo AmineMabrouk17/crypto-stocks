@@ -8,6 +8,8 @@ import {
   type ChartRange,
   type DayStats,
 } from "@crypto-stocks/lib";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useChartRange } from "@/lib/useChartRange";
 import { AnimatedBadge, type AnimatedBadgeStatus } from "../motion/animated-badge";
@@ -37,11 +39,23 @@ function AssetHeader({
   return (
     <div className="flex items-start justify-between">
       <div>
-        <h2 className="text-lg font-semibold">
+        <h2 className="flex items-center gap-1.5 text-lg font-semibold">
           {asset.name}{" "}
           <span className="font-mono text-sm font-normal text-zinc-500 dark:text-zinc-400">
             {asset.symbol}
           </span>
+          <Link
+            href={
+              asset.kind === "crypto"
+                ? `/asset/${asset.symbol}?id=${encodeURIComponent(asset.id)}`
+                : `/asset/${asset.symbol}`
+            }
+            aria-label={`Open ${asset.symbol} full page`}
+            title="Open full page"
+            className="text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
         </h2>
         <DayStatsRow stats={dayStats} windowLabel={windowLabel} />
       </div>
