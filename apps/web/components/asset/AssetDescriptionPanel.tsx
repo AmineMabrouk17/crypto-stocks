@@ -1,7 +1,8 @@
 "use client";
 
 import { fetchCoinDescription, type AssetDescription, type AssetRef } from "@crypto-stocks/lib";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import useSWR from "swr";
 import { Loader } from "../motion/loader";
 
 async function fetchDescription(asset: AssetRef): Promise<AssetDescription> {
@@ -13,6 +14,10 @@ async function fetchDescription(asset: AssetRef): Promise<AssetDescription> {
   return res.json();
 }
 
+// Descriptions/profiles rarely change — cache aggressively and dedupe across remounts so
+// re-selecting a recently-viewed asset doesn't refetch or flash a loading state.
+const DEDUPING_INTERVAL_MS = 5 * 60_000;
+
 export function AssetDescriptionPanel({
   asset,
   onLoaded,
@@ -20,32 +25,21 @@ export function AssetDescriptionPanel({
   asset: AssetRef;
   onLoaded?: (summary: string | null) => void;
 }) {
-  const [description, setDescription] = useState<AssetDescription | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [errored, setErrored] = useState(false);
+  const {
+    data: description,
+    error,
+    isLoading: loading,
+  } = useSWR<AssetDescription>(
+    ["asset-description", asset.kind, asset.kind === "crypto" ? asset.id : asset.symbol],
+    () => fetchDescription(asset),
+    { dedupingInterval: DEDUPING_INTERVAL_MS, revalidateOnFocus: false },
+  );
+  const errored = Boolean(error);
 
   useEffect(() => {
-    let cancelled = false;
-
-    fetchDescription(asset)
-      .then((desc) => {
-        if (!cancelled) {
-          setDescription(desc);
-          onLoaded?.(desc.summary);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setErrored(true);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
+    if (description) onLoaded?.(description.summary);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [asset]);
+  }, [description]);
 
   return (
     <div className="rounded-xl border border-black/10 p-4 text-sm dark:border-white/15">
