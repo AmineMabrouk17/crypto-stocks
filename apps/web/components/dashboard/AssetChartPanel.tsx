@@ -25,102 +25,6 @@ import { useStockPolling } from "../chart/useStockPolling";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
 import { PriceAlertPanel } from "./PriceAlertPanel";
 
-function AssetHeader({
-  asset,
-  status,
-  price,
-  dayStats,
-  windowLabel,
-}: {
-  asset: AssetRef;
-  status: "connecting" | "open" | "closed";
-  price: number | null;
-  dayStats: DayStats;
-  windowLabel: string;
-}) {
-  return (
-    <div className="flex items-start justify-between">
-      <div>
-        <h2 className="flex items-center gap-1.5 text-lg font-semibold">
-          {asset.name}{" "}
-          <span className="font-mono text-sm font-normal text-zinc-500 dark:text-zinc-400">
-            {asset.symbol}
-          </span>
-          <Link
-            href={
-              asset.kind === "crypto"
-                ? `/asset/${asset.symbol}?id=${encodeURIComponent(asset.id)}`
-                : `/asset/${asset.symbol}`
-            }
-            aria-label={`Open ${asset.symbol} full page`}
-            title="Open full page"
-            className="text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
-        </h2>
-        <DayStatsRow stats={dayStats} windowLabel={windowLabel} />
-        <PriceAlertPanel asset={asset} price={price} />
-      </div>
-      <StatusBadge status={status} price={price} />
-    </div>
-  );
-}
-
-function CryptoChart({
-  asset,
-  range,
-  chart,
-  onSeedingChange,
-}: {
-  asset: AssetRef;
-  range: ChartRange;
-  chart: PriceChartHandle | null;
-  onSeedingChange: (seeding: boolean) => void;
-}) {
-  const { setLivePrice, setMarketStats } = useSelectedAsset();
-  const { price, stats, status, seeding } = useCryptoKlineStream(asset.symbol, range, chart);
-  const dayStats = useCrypto24hStats(asset.symbol);
-
-  useEffect(() => {
-    setLivePrice(price);
-    setMarketStats(stats);
-  }, [price, stats, setLivePrice, setMarketStats]);
-
-  useEffect(() => {
-    onSeedingChange(seeding);
-  }, [seeding, onSeedingChange]);
-
-  return <AssetHeader asset={asset} status={status} price={price} dayStats={dayStats} windowLabel="24h" />;
-}
-
-function StockChart({
-  asset,
-  range,
-  chart,
-  onSeedingChange,
-}: {
-  asset: AssetRef;
-  range: ChartRange;
-  chart: PriceChartHandle | null;
-  onSeedingChange: (seeding: boolean) => void;
-}) {
-  const { setLivePrice, setMarketStats } = useSelectedAsset();
-  const { price, stats, status, seeding } = useStockPolling(asset.symbol, range, chart);
-  const dayStats = useStockDayStats(asset.symbol);
-
-  useEffect(() => {
-    setLivePrice(price);
-    setMarketStats(stats);
-  }, [price, stats, setLivePrice, setMarketStats]);
-
-  useEffect(() => {
-    onSeedingChange(seeding);
-  }, [seeding, onSeedingChange]);
-
-  return <AssetHeader asset={asset} status={status} price={price} dayStats={dayStats} windowLabel="Today" />;
-}
-
 const STATUS_TO_BADGE: Record<"connecting" | "open" | "closed", AnimatedBadgeStatus> = {
   connecting: "loading",
   open: "success",
@@ -138,6 +42,40 @@ function formatVolume(volume: number): string {
   if (volume >= 1_000_000) return `${(volume / 1_000_000).toFixed(2)}M`;
   if (volume >= 1_000) return `${(volume / 1_000).toFixed(2)}K`;
   return volume.toLocaleString("en-US", { maximumFractionDigits: 0 });
+}
+
+function AssetHeader({
+  asset,
+  status,
+  price,
+}: {
+  asset: AssetRef;
+  status: "connecting" | "open" | "closed";
+  price: number | null;
+}) {
+  return (
+    <div className="flex items-start justify-between">
+      <h2 className="flex items-center gap-1.5 text-lg font-semibold">
+        {asset.name}{" "}
+        <span className="font-mono text-sm font-normal text-zinc-500 dark:text-zinc-400">
+          {asset.symbol}
+        </span>
+        <Link
+          href={
+            asset.kind === "crypto"
+              ? `/asset/${asset.symbol}?id=${encodeURIComponent(asset.id)}`
+              : `/asset/${asset.symbol}`
+          }
+          aria-label={`Open ${asset.symbol} full page`}
+          title="Open full page"
+          className="text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+        </Link>
+      </h2>
+      <StatusBadge status={status} price={price} />
+    </div>
+  );
 }
 
 function StatusBadge({
@@ -175,23 +113,39 @@ function StatusBadge({
   );
 }
 
-function DayStatsRow({ stats, windowLabel }: { stats: DayStats; windowLabel: string }) {
+function StatsRow({ stats, windowLabel }: { stats: DayStats; windowLabel: string }) {
   const hasAny = stats.changePercent != null || stats.high != null || stats.low != null;
   if (!hasAny) return null;
 
   const positive = (stats.changePercent ?? 0) >= 0;
 
   return (
-    <div className="font-mono mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
       {stats.changePercent != null && (
-        <span className={positive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+        <span
+          className={`font-mono font-semibold ${
+            positive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+          }`}
+        >
           {positive ? "+" : ""}
           {stats.changePercent.toFixed(2)}% ({windowLabel})
         </span>
       )}
-      {stats.high != null && <span>High {formatCurrency(stats.high)}</span>}
-      {stats.low != null && <span>Low {formatCurrency(stats.low)}</span>}
-      {stats.volume != null && <span>Vol {formatVolume(stats.volume)}</span>}
+      {stats.high != null && (
+        <span className="font-mono text-zinc-600 dark:text-zinc-300">
+          High <span className="font-semibold">{formatCurrency(stats.high)}</span>
+        </span>
+      )}
+      {stats.low != null && (
+        <span className="font-mono text-zinc-600 dark:text-zinc-300">
+          Low <span className="font-semibold">{formatCurrency(stats.low)}</span>
+        </span>
+      )}
+      {stats.volume != null && (
+        <span className="font-mono text-zinc-600 dark:text-zinc-300">
+          Vol <span className="font-semibold">{formatVolume(stats.volume)}</span>
+        </span>
+      )}
     </div>
   );
 }
@@ -220,10 +174,47 @@ function exportCandlesToCsv(asset: AssetRef, range: ChartRange, candles: Candle[
 
 export function AssetChartPanel({ asset }: { asset: AssetRef }) {
   const [chartHandle, setChartHandle] = useState<PriceChartHandle | null>(null);
-  const [seeding, setSeeding] = useState(true);
   const { range, setRange } = useChartRange();
   const handleReady = useCallback((handle: PriceChartHandle) => setChartHandle(handle), []);
-  const rangeKey = `${asset.symbol}:${range}`;
+
+  const { setLivePrice, setMarketStats } = useSelectedAsset();
+
+  const {
+    price: cryptoPrice,
+    stats: cryptoStats,
+    status: cryptoStatus,
+    seeding: cryptoSeeding,
+  } = useCryptoKlineStream(
+    asset.kind === "crypto" ? asset.symbol : "",
+    range,
+    asset.kind === "crypto" ? chartHandle : null,
+  );
+  const cryptoDayStats = useCrypto24hStats(asset.kind === "crypto" ? asset.symbol : "");
+
+  const {
+    price: stockPrice,
+    stats: stockStats,
+    status: stockStatus,
+    seeding: stockSeeding,
+  } = useStockPolling(
+    asset.kind === "stock" ? asset.symbol : "",
+    range,
+    asset.kind === "stock" ? chartHandle : null,
+  );
+  const stockDayStats = useStockDayStats(asset.kind === "stock" ? asset.symbol : "");
+
+  const isCrypto = asset.kind === "crypto";
+  const price = isCrypto ? cryptoPrice : stockPrice;
+  const stats = isCrypto ? cryptoStats : stockStats;
+  const status = isCrypto ? cryptoStatus : stockStatus;
+  const streamSeeding = isCrypto ? cryptoSeeding : stockSeeding;
+  const dayStats = isCrypto ? cryptoDayStats : stockDayStats;
+  const windowLabel = isCrypto ? "24h" : "Today";
+
+  useEffect(() => {
+    setLivePrice(price);
+    setMarketStats(stats);
+  }, [price, stats, setLivePrice, setMarketStats]);
 
   const handleExportCsv = useCallback(() => {
     if (!chartHandle) return;
@@ -234,40 +225,26 @@ export function AssetChartPanel({ asset }: { asset: AssetRef }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        {asset.kind === "crypto" ? (
-          <CryptoChart
-            key={rangeKey}
-            asset={asset}
-            range={range}
-            chart={chartHandle}
-            onSeedingChange={setSeeding}
-          />
-        ) : (
-          <StockChart
-            key={rangeKey}
-            asset={asset}
-            range={range}
-            chart={chartHandle}
-            onSeedingChange={setSeeding}
-          />
-        )}
-      </div>
+      <AssetHeader asset={asset} status={status} price={price} />
+      <StatsRow stats={dayStats} windowLabel={windowLabel} />
       <div className="flex items-center justify-between gap-2">
         <ChartRangeSelector range={range} onChange={setRange} />
-        <button
-          type="button"
-          onClick={handleExportCsv}
-          disabled={!chartHandle}
-          aria-label={`Export ${asset.symbol} chart data as CSV`}
-          title="Export CSV"
-          className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-400 dark:hover:bg-white/10"
-        >
-          <Download className="h-3.5 w-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <PriceAlertPanel asset={asset} price={price} />
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={!chartHandle}
+            aria-label={`Export ${asset.symbol} chart data as CSV`}
+            title="Export CSV"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-400 dark:hover:bg-white/10"
+          >
+            <Download className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
       <div className="relative">
-        {seeding && (
+        {streamSeeding && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/60 backdrop-blur-sm dark:bg-zinc-950/60">
             <Loader variant="dots" size={28} />
           </div>
