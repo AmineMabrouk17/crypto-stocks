@@ -10,7 +10,7 @@ export default function Home() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex w-full flex-1 flex-col">
       <header className="flex items-center justify-between border-b border-black/10 px-4 py-3 dark:border-white/15">
         <div>
           <h1 className="text-lg font-semibold">Crypto & Stocks Dashboard</h1>
