@@ -2,8 +2,10 @@
 
 import type { AssetRef } from "@crypto-stocks/lib";
 import { X } from "lucide-react";
+import { useState } from "react";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
 import { useWatchlist } from "@/lib/useWatchlist";
+import { logoUrl } from "@/lib/assetLogos";
 import { cn } from "@/lib/utils";
 
 function isSameAsset(a: AssetRef, b: AssetRef) {
@@ -39,6 +41,11 @@ function displaySymbol(asset: AssetRef): string {
 export function Watchlist() {
   const { watchlist, removeAsset } = useWatchlist();
   const { selected, setSelected } = useSelectedAsset();
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+
+  const handleImageError = (key: string) => {
+    setFailedImages((prev) => new Set(prev).add(key));
+  };
 
   return (
     <div className="flex flex-col gap-1" role="list">
@@ -46,10 +53,12 @@ export function Watchlist() {
         const active = isSameAsset(asset, selected);
         const colors = asset.kind === "crypto" ? CRYPTO_COLORS : STOCK_COLORS;
         const initial = initials(asset.symbol);
+        const imageKey = `${asset.kind}:${asset.symbol}`;
+        const showImage = !failedImages.has(imageKey);
 
         return (
           <div
-            key={`${asset.kind}:${asset.symbol}`}
+            key={imageKey}
             role="listitem"
             className={cn(
               "group relative flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-all duration-150",
@@ -69,14 +78,23 @@ export function Watchlist() {
               />
             )}
 
-            <div
-              className={cn(
-                "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white shadow-sm",
-                colors.gradient,
-              )}
-            >
-              {initial}
-            </div>
+            {showImage ? (
+              <img
+                src={logoUrl(asset)}
+                alt={asset.name}
+                onError={() => handleImageError(imageKey)}
+                className="h-8 w-8 flex-shrink-0 rounded-full bg-white/10 object-contain"
+              />
+            ) : (
+              <div
+                className={cn(
+                  "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white shadow-sm",
+                  colors.gradient,
+                )}
+              >
+                {initial}
+              </div>
+            )}
 
             <button
               type="button"
