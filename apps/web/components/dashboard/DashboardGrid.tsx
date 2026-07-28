@@ -19,7 +19,7 @@ export function DashboardGrid() {
 
   return (
     <div
-      className={`grid flex-1 grid-cols-1 gap-4 p-4 ${
+      className={`grid w-full flex-1 grid-cols-1 gap-4 p-4 ${
         collapsed ? "lg:grid-cols-[260px_1fr_56px]" : "lg:grid-cols-[260px_1fr_320px]"
       }`}
     >
