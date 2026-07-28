@@ -2,8 +2,10 @@
 
 import type { AssetRef } from "@crypto-stocks/lib";
 import { X } from "lucide-react";
+import Image from "next/image";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
 import { useWatchlist } from "@/lib/useWatchlist";
+import { useAssetImages } from "@/lib/useAssetImages";
 import { cn } from "@/lib/utils";
 
 function isSameAsset(a: AssetRef, b: AssetRef) {
@@ -39,6 +41,7 @@ function displaySymbol(asset: AssetRef): string {
 export function Watchlist() {
   const { watchlist, removeAsset } = useWatchlist();
   const { selected, setSelected } = useSelectedAsset();
+  const images = useAssetImages(watchlist);
 
   return (
     <div className="flex flex-col gap-1" role="list">
@@ -46,6 +49,7 @@ export function Watchlist() {
         const active = isSameAsset(asset, selected);
         const colors = asset.kind === "crypto" ? CRYPTO_COLORS : STOCK_COLORS;
         const initial = initials(asset.symbol);
+        const imageUrl = images.get(asset.id);
 
         return (
           <div
@@ -69,14 +73,24 @@ export function Watchlist() {
               />
             )}
 
-            <div
-              className={cn(
-                "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white shadow-sm",
-                colors.gradient,
-              )}
-            >
-              {initial}
-            </div>
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={asset.name}
+                width={32}
+                height={32}
+                className="flex-shrink-0 rounded-full bg-white/10"
+              />
+            ) : (
+              <div
+                className={cn(
+                  "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white shadow-sm",
+                  colors.gradient,
+                )}
+              >
+                {initial}
+              </div>
+            )}
 
             <button
               type="button"
