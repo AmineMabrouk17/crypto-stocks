@@ -23,9 +23,13 @@ export function DashboardGrid() {
         collapsed ? "lg:grid-cols-[260px_1fr_56px]" : "lg:grid-cols-[260px_1fr_320px]"
       }`}
     >
-      <aside className="flex flex-col gap-3">
-        <AssetSearchBar />
-        <Watchlist />
+      <aside className="flex flex-col">
+        <div className="flex-shrink-0 pb-3">
+          <AssetSearchBar />
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <Watchlist />
+        </div>
       </aside>
 
       <main className="flex flex-col gap-4">
