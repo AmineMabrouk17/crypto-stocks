@@ -7,7 +7,7 @@ const STORAGE_KEY = "crypto-stocks:free-model";
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
-let cache: FreeModel | null | undefined;
+let cache: FreeModel | null = null;
 const defaultModel = FREE_MODELS[0];
 
 function readFromStorage(): FreeModel {
@@ -22,8 +22,8 @@ function readFromStorage(): FreeModel {
 }
 
 function getSnapshot(): FreeModel {
-  if (cache === undefined) cache = readFromStorage();
-  return cache;
+  if (cache === null) cache = readFromStorage();
+  return cache!;
 }
 
 function getServerSnapshot(): FreeModel {
