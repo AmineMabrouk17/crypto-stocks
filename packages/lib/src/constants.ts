@@ -15,8 +15,13 @@ export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta
 export const GROQ_API_BASE = "https://api.groq.com/openai/v1";
 
 export const FREE_MODELS: FreeModel[] = [
-  { id: "gemini-flash", label: "Gemini Flash", provider: "gemini", modelId: GEMINI_MODEL },
+  { id: "gemini-flash", label: "Gemini 2.0 Flash", provider: "gemini", modelId: GEMINI_MODEL },
+  { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash", provider: "gemini", modelId: "gemini-2.5-flash-latest" },
+  { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro", provider: "gemini", modelId: "gemini-2.5-pro-latest" },
   { id: "groq-llama-3.3-70b", label: "Groq Llama 3.3 70B", provider: "groq", modelId: "llama-3.3-70b-versatile" },
+  { id: "groq-llama-3.1-8b", label: "Groq Llama 3.1 8B", provider: "groq", modelId: "llama-3.1-8b-instant" },
+  { id: "groq-mixtral-8x7b", label: "Groq Mixtral 8x7B", provider: "groq", modelId: "mixtral-8x7b-32768" },
+  { id: "groq-gemma2-9b", label: "Groq Gemma 2 9B", provider: "groq", modelId: "gemma2-9b-it" },
 ];
 
 export const GOOGLE_NEWS_RSS_BASE = "https://news.google.com/rss/search";

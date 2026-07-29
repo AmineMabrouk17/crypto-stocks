@@ -160,7 +160,7 @@ export async function POST(request: Request) {
               { status: 500 },
             );
           }
-          reply = await generateChatReply(apiKey, systemInstruction, messages);
+          reply = await generateChatReply(apiKey, systemInstruction, messages, model.modelId);
           break;
         }
       }

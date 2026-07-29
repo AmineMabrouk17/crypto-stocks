@@ -1,12 +1,14 @@
-import { GEMINI_API_BASE, GEMINI_MODEL } from "./constants";
+import { GEMINI_API_BASE } from "./constants";
 import type { ChatMessage } from "./types";
 
 export async function generateChatReply(
   apiKey: string,
   systemInstruction: string,
   messages: ChatMessage[],
+  model?: string,
 ): Promise<string> {
-  const url = `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent`;
+  const modelId = model ?? "gemini-flash-latest";
+  const url = `${GEMINI_API_BASE}/models/${modelId}:generateContent`;
 
   const contents = messages.map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
