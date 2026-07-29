@@ -29,7 +29,11 @@ export function PredictionPanel({
   const [userDir, setUserDir] = useState<"up" | "down" | null>(null);
   const [votedAtPrice, setVotedAtPrice] = useState<number | null>(null);
   const [result, setResult] = useState<{ correct: boolean; actualPrice: number } | null>(null);
-  const resolvedRef = useRef(false);
+  const prevCandlesLenRef = useRef(0);
+  const userDirRef = useRef(userDir);
+  const votedAtPriceRef = useRef(votedAtPrice);
+  useEffect(() => { userDirRef.current = userDir; }, [userDir]);
+  useEffect(() => { votedAtPriceRef.current = votedAtPrice; }, [votedAtPrice]);
 
   const candleInterval = useMemo(() => {
     if (candles.length < 2) return 0;
@@ -47,18 +51,6 @@ export function PredictionPanel({
 
   const predictedPrice = useMemo(() => predictNextPrice(candles.map((c) => c.close)), [candles]);
 
-  useEffect(() => {
-    if (!userDir || !votedAtPrice || !currentPrice) return;
-    if (currentPrice === votedAtPrice || resolvedRef.current) return;
-
-    resolvedRef.current = true;
-    const correct =
-      (userDir === "up" && currentPrice >= votedAtPrice) ||
-      (userDir === "down" && currentPrice < votedAtPrice);
-
-    setResult({ correct, actualPrice: currentPrice });
-  }, [userDir, votedAtPrice, currentPrice]);
-
   const { data: counts, mutate: refreshCounts } = useSWR(
     voterId
       ? `/api/predictions/counts?symbol=${asset.symbol}&voter_id=${voterId}`
@@ -67,10 +59,34 @@ export function PredictionPanel({
     { refreshInterval: 10_000 },
   );
 
+  useEffect(() => {
+    const prevLen = prevCandlesLenRef.current;
+    prevCandlesLenRef.current = candles.length;
+
+    if (prevLen > 0 && candles.length === prevLen + 1 && candles.length >= 2) {
+      const completedCandle = candles[candles.length - 2];
+      const actualClose = completedCandle.close;
+
+      fetch("/api/predictions/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ asset_symbol: asset.symbol }),
+      }).then(() => refreshCounts());
+
+      const dir = userDirRef.current;
+      const votePrice = votedAtPriceRef.current;
+      if (dir != null && votePrice != null) {
+        const correct =
+          (dir === "up" && actualClose >= votePrice) ||
+          (dir === "down" && actualClose < votePrice);
+        setResult({ correct, actualPrice: actualClose });
+      }
+    }
+  }, [candles.length, asset.symbol, refreshCounts]);
+
   const handleVote = useCallback(
     async (dir: "up" | "down") => {
       if (!voterId) return;
-      resolvedRef.current = false;
       setResult(null);
       setUserDir(dir);
       setVotedAtPrice(currentPrice);
@@ -159,7 +175,7 @@ export function PredictionPanel({
         ) : userDir ? (
           <span className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
             <Loader className="h-3 w-3 animate-spin" />
-            Waiting for price move...
+            Waiting for {intervalLabel} close...
           </span>
         ) : (
           <>
