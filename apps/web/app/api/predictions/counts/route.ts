@@ -1,0 +1,53 @@
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const symbol = searchParams.get("symbol");
+  const voterId = searchParams.get("voter_id");
+
+  if (!symbol) {
+    return NextResponse.json({ error: "Missing required param: symbol" }, { status: 400 });
+  }
+
+  try {
+    const { count: up, error: upError } = await supabase
+      .from("predictions")
+      .select("*", { count: "exact", head: true })
+      .eq("asset_symbol", symbol)
+      .eq("direction", "up")
+      .is("correct", null);
+
+    if (upError) throw upError;
+
+    const { count: down, error: downError } = await supabase
+      .from("predictions")
+      .select("*", { count: "exact", head: true })
+      .eq("asset_symbol", symbol)
+      .eq("direction", "down")
+      .is("correct", null);
+
+    if (downError) throw downError;
+
+    let userVote: { direction: string; correct: boolean | null } | null = null;
+    if (voterId) {
+      const { data: vote } = await supabase
+        .from("predictions")
+        .select("direction, correct")
+        .eq("asset_symbol", symbol)
+        .eq("voter_id", voterId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      userVote = vote ?? null;
+    }
+
+    return NextResponse.json({ up: up ?? 0, down: down ?? 0, userVote });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Failed to fetch counts" },
+      { status: 500 },
+    );
+  }
+}
