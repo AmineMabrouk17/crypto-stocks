@@ -113,21 +113,36 @@ export function PredictionPanel({
           </span>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1 font-mono tabular-nums text-emerald-600 dark:text-emerald-400" title="Total users predicting Up">
-            <TrendingUp className="h-3 w-3" />
-            {counts?.up ?? 0}
+          <span className="group relative">
+            <span className="flex items-center gap-1 font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="h-3 w-3" />
+              {counts?.up ?? 0}
+            </span>
+            <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-zinc-100 dark:text-zinc-900">
+              Users predicting Up
+            </span>
           </span>
-          <span className="flex items-center gap-1 font-mono tabular-nums text-red-600 dark:text-red-400" title="Total users predicting Down">
-            <TrendingDown className="h-3 w-3" />
-            {counts?.down ?? 0}
+          <span className="group relative">
+            <span className="flex items-center gap-1 font-mono tabular-nums text-red-600 dark:text-red-400">
+              <TrendingDown className="h-3 w-3" />
+              {counts?.down ?? 0}
+            </span>
+            <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-zinc-100 dark:text-zinc-900">
+              Users predicting Down
+            </span>
           </span>
         </div>
       </div>
 
       <div className="mt-1.5 flex items-center gap-1.5">
         <span className="text-xs text-zinc-400 dark:text-zinc-500">Forecast:</span>
-          <span className="font-mono text-sm font-semibold tabular-nums text-zinc-800 dark:text-zinc-200" title="Predicted next price (linear regression on last candles)">
-            {formatCurrency(predictedPrice)}
+          <span className="group relative">
+            <span className="font-mono text-sm font-semibold tabular-nums text-zinc-800 dark:text-zinc-200">
+              {formatCurrency(predictedPrice)}
+            </span>
+            <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-zinc-100 dark:text-zinc-900">
+              Predicted next price
+            </span>
           </span>
       </div>
 
