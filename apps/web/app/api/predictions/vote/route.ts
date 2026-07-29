@@ -16,27 +16,22 @@ export async function POST(request: Request) {
   try {
     const { data: existing } = await supabase
       .from("predictions")
-      .select("id, direction, predicted_price")
+      .select("id")
       .eq("asset_symbol", asset_symbol)
       .eq("voter_id", voter_id)
-      .is("correct", null)
+      .is("resolved_at", null)
       .maybeSingle();
 
     if (existing) {
       await supabase
         .from("predictions")
-        .update({ resolved_at: new Date().toISOString(), correct: false })
+        .update({ resolved_at: new Date().toISOString() })
         .eq("id", existing.id);
     }
 
     const { data, error } = await supabase
       .from("predictions")
-      .insert({
-        asset_symbol,
-        direction,
-        predicted_price,
-        voter_id,
-      })
+      .insert({ asset_symbol, direction, predicted_price, voter_id })
       .select()
       .single();
 

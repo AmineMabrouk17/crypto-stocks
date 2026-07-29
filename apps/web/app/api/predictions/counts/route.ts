@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       .select("*", { count: "exact", head: true })
       .eq("asset_symbol", symbol)
       .eq("direction", "up")
-      .is("correct", null);
+      .is("resolved_at", null);
 
     if (upError) throw upError;
 
@@ -26,19 +26,18 @@ export async function GET(request: Request) {
       .select("*", { count: "exact", head: true })
       .eq("asset_symbol", symbol)
       .eq("direction", "down")
-      .is("correct", null);
+      .is("resolved_at", null);
 
     if (downError) throw downError;
 
-    let userVote: { direction: string; correct: boolean | null } | null = null;
+    let userVote: { direction: string } | null = null;
     if (voterId) {
       const { data: vote } = await supabase
         .from("predictions")
-        .select("direction, correct")
+        .select("direction")
         .eq("asset_symbol", symbol)
         .eq("voter_id", voterId)
-        .order("created_at", { ascending: false })
-        .limit(1)
+        .is("resolved_at", null)
         .maybeSingle();
 
       userVote = vote ?? null;

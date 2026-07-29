@@ -20,7 +20,7 @@ export function AssetDetailView({ asset }: { asset: AssetRef }) {
         <AssetDescriptionPanel asset={asset} onLoaded={setDescription} />
         <NewsFeed key={assetKey} asset={asset} />
       </main>
-      <aside className="min-h-[420px] lg:min-h-0">
+      <aside className="h-[380px]">
         <ChatPanel asset={asset} livePrice={livePrice} marketStats={marketStats} description={description} />
       </aside>
     </div>
