@@ -1,8 +1,10 @@
 "use client";
 
 import type { AssetRef, ChatMessage, MarketStats } from "@crypto-stocks/lib";
+import { FREE_MODELS } from "@crypto-stocks/lib";
 import { PanelRightClose, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useFreeModel } from "@/lib/useFreeModel";
 import { useLlmSettings } from "@/lib/useLlmSettings";
 import { AnimatedBadge } from "../motion/animated-badge";
 import { StatefulButton, type ButtonState } from "../motion/button/stateful";
@@ -13,6 +15,7 @@ const PROVIDER_BADGE_LABELS: Record<string, string> = {
   gemini: "Gemini",
   openai: "OpenAI",
   anthropic: "Anthropic",
+  groq: "Groq",
   custom: "Custom",
 };
 
@@ -34,10 +37,11 @@ export function ChatPanel({
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { settings: llmSettings } = useLlmSettings();
+  const { selected: freeModel, select: selectFreeModel } = useFreeModel();
 
   const badgeLabel = llmSettings
     ? `${PROVIDER_BADGE_LABELS[llmSettings.provider] ?? llmSettings.provider} · ${llmSettings.model}`
-    : "Gemini Flash";
+    : freeModel.label;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -63,6 +67,7 @@ export function ChatPanel({
           marketStats,
           description,
           llmSettings,
+          freeModelId: llmSettings ? undefined : freeModel.id,
         }),
       });
       const data = await res.json();
@@ -83,9 +88,28 @@ export function ChatPanel({
       <div className="flex items-center justify-between border-b border-black/10 px-4 py-2 dark:border-white/15">
         <span className="text-sm font-medium">Ask about {asset.symbol}</span>
         <div className="flex items-center gap-2">
-          <AnimatedBadge status="info" size="sm" icon={<Sparkles className="h-3.5 w-3.5" />}>
-            {badgeLabel}
-          </AnimatedBadge>
+          {!llmSettings && (
+            <select
+              value={freeModel.id}
+              onChange={(e) => {
+                const model = FREE_MODELS.find((m) => m.id === e.target.value);
+                if (model) selectFreeModel(model);
+              }}
+              aria-label="Select AI model"
+              className="w-28 rounded-md border border-black/10 bg-white px-1.5 py-1 text-[11px] outline-none focus:border-black/30 dark:border-white/15 dark:bg-zinc-900 dark:focus:border-white/30"
+            >
+              {FREE_MODELS.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          )}
+          {llmSettings && (
+            <AnimatedBadge status="info" size="sm" icon={<Sparkles className="h-3.5 w-3.5" />}>
+              {badgeLabel}
+            </AnimatedBadge>
+          )}
           {onCollapse && (
             <button
               type="button"

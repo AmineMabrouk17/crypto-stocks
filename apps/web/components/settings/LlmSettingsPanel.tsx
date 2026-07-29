@@ -10,6 +10,7 @@ const PROVIDER_LABELS: Record<LlmProvider, string> = {
   gemini: "Gemini",
   openai: "OpenAI",
   anthropic: "Anthropic (Claude)",
+  groq: "Groq (free LLMs)",
   custom: "Custom (OpenAI-compatible)",
 };
 
@@ -17,6 +18,7 @@ const MODEL_PLACEHOLDERS: Record<LlmProvider, string> = {
   gemini: "gemini-flash-latest",
   openai: "gpt-4o-mini",
   anthropic: "claude-haiku-4-5",
+  groq: "llama-3.3-70b-versatile",
   custom: "your-model-id",
 };
 
