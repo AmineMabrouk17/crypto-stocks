@@ -3,6 +3,7 @@
 import type { AssetRef, Candle } from "@crypto-stocks/lib";
 import { formatCurrency } from "@crypto-stocks/lib";
 import { TrendingUp, TrendingDown, Check, X, Loader } from "lucide-react";
+import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { predictNextPrice } from "@/lib/pricePrediction";
@@ -64,7 +65,7 @@ export function PredictionPanel({
       ? `/api/predictions/counts?symbol=${asset.symbol}&voter_id=${voterId}`
       : null,
     fetcher,
-    { refreshInterval: 10_000 },
+    { refreshInterval: 5_000 },
   );
 
   const handleVote = useCallback(
@@ -116,7 +117,19 @@ export function PredictionPanel({
           <span className="group relative">
             <span className="flex items-center gap-1 font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
               <TrendingUp className="h-3 w-3" />
-              {counts?.up ?? 0}
+              <motion.span
+                key={counts?.up ?? 0}
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.25, 1] }}
+                transition={{ duration: 0.25 }}
+              >
+                {counts?.up ?? 0}
+              </motion.span>
+              {counts?.userVote?.direction === "up" && (
+                <span className="rounded bg-emerald-500/15 px-1 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  You
+                </span>
+              )}
             </span>
             <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-zinc-100 dark:text-zinc-900">
               Users predicting Up
@@ -125,7 +138,19 @@ export function PredictionPanel({
           <span className="group relative">
             <span className="flex items-center gap-1 font-mono tabular-nums text-red-600 dark:text-red-400">
               <TrendingDown className="h-3 w-3" />
-              {counts?.down ?? 0}
+              <motion.span
+                key={counts?.down ?? 0}
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.25, 1] }}
+                transition={{ duration: 0.25 }}
+              >
+                {counts?.down ?? 0}
+              </motion.span>
+              {counts?.userVote?.direction === "down" && (
+                <span className="rounded bg-red-500/15 px-1 text-[9px] font-semibold text-red-600 dark:text-red-400">
+                  You
+                </span>
+              )}
             </span>
             <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-zinc-100 dark:text-zinc-900">
               Users predicting Down
