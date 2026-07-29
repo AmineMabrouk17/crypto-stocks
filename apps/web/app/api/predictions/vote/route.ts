@@ -14,29 +14,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { data: existing } = await supabase
+    await supabase
       .from("predictions")
-      .select("id, direction, predicted_price")
+      .delete()
       .eq("asset_symbol", asset_symbol)
-      .eq("voter_id", voter_id)
-      .is("correct", null)
-      .maybeSingle();
-
-    if (existing) {
-      await supabase
-        .from("predictions")
-        .update({ resolved_at: new Date().toISOString(), correct: false })
-        .eq("id", existing.id);
-    }
+      .eq("voter_id", voter_id);
 
     const { data, error } = await supabase
       .from("predictions")
-      .insert({
-        asset_symbol,
-        direction,
-        predicted_price,
-        voter_id,
-      })
+      .insert({ asset_symbol, direction, predicted_price, voter_id })
       .select()
       .single();
 
