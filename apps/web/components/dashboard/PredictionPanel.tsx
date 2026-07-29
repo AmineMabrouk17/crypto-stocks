@@ -28,6 +28,20 @@ export function PredictionPanel({
   const [votedPredicted, setVotedPredicted] = useState<number | null>(null);
   const [votedCandleTime, setVotedCandleTime] = useState<number | null>(null);
 
+  const candleInterval = useMemo(() => {
+    if (candles.length < 2) return 0;
+    return candles[candles.length - 1].time - candles[candles.length - 2].time;
+  }, [candles]);
+
+  const intervalLabel =
+    candleInterval >= 86400
+      ? `${Math.round(candleInterval / 86400)}d`
+      : candleInterval >= 3600
+        ? `${Math.round(candleInterval / 3600)}h`
+        : candleInterval >= 60
+          ? `${Math.round(candleInterval / 60)}m`
+          : "";
+
   const predictedPrice = useMemo(() => predictNextPrice(candles.map((c) => c.close)), [candles]);
 
   const lastCandleTime = candles.length > 0 ? candles[candles.length - 1].time : 0;
@@ -90,7 +104,7 @@ export function PredictionPanel({
             Price Prediction
           </span>
           <span className="rounded bg-black/5 px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 dark:bg-white/10 dark:text-zinc-400">
-            next candle
+            next {intervalLabel}
           </span>
         </div>
         <div className="flex items-center gap-3 text-xs">
@@ -140,7 +154,7 @@ export function PredictionPanel({
         ) : userDir ? (
           <span className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
             <Loader className="h-3 w-3 animate-spin" />
-            Waiting for next candle...
+            Waiting for next {intervalLabel}...
           </span>
         ) : null}
 
