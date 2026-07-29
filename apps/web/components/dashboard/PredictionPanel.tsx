@@ -113,11 +113,11 @@ export function PredictionPanel({
           </span>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1 font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
+          <span className="flex items-center gap-1 font-mono tabular-nums text-emerald-600 dark:text-emerald-400" title="Total users predicting Up">
             <TrendingUp className="h-3 w-3" />
             {counts?.up ?? 0}
           </span>
-          <span className="flex items-center gap-1 font-mono tabular-nums text-red-600 dark:text-red-400">
+          <span className="flex items-center gap-1 font-mono tabular-nums text-red-600 dark:text-red-400" title="Total users predicting Down">
             <TrendingDown className="h-3 w-3" />
             {counts?.down ?? 0}
           </span>
@@ -126,9 +126,9 @@ export function PredictionPanel({
 
       <div className="mt-1.5 flex items-center gap-1.5">
         <span className="text-xs text-zinc-400 dark:text-zinc-500">Forecast:</span>
-        <span className="font-mono text-sm font-semibold tabular-nums text-zinc-800 dark:text-zinc-200">
-          {formatCurrency(predictedPrice)}
-        </span>
+          <span className="font-mono text-sm font-semibold tabular-nums text-zinc-800 dark:text-zinc-200" title="Predicted next price (linear regression on last candles)">
+            {formatCurrency(predictedPrice)}
+          </span>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
