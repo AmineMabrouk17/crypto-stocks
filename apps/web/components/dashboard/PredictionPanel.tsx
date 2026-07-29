@@ -3,7 +3,7 @@
 import type { AssetRef, Candle } from "@crypto-stocks/lib";
 import { formatCurrency } from "@crypto-stocks/lib";
 import { TrendingUp, TrendingDown, Check, X, Loader } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { predictNextPrice } from "@/lib/pricePrediction";
 import { useVoterId } from "@/lib/useVoterId";
@@ -18,15 +18,18 @@ async function fetcher(url: string) {
 export function PredictionPanel({
   asset,
   candles,
+  currentPrice,
 }: {
   asset: AssetRef;
   candles: Candle[];
+  currentPrice: number | null;
 }) {
   const voterId = useVoterId();
   const [submitting, setSubmitting] = useState(false);
   const [userDir, setUserDir] = useState<"up" | "down" | null>(null);
-  const [votedPredicted, setVotedPredicted] = useState<number | null>(null);
-  const [votedCandleTime, setVotedCandleTime] = useState<number | null>(null);
+  const [votedAtPrice, setVotedAtPrice] = useState<number | null>(null);
+  const [result, setResult] = useState<{ correct: boolean; actualPrice: number } | null>(null);
+  const resolvedRef = useRef(false);
 
   const candleInterval = useMemo(() => {
     if (candles.length < 2) return 0;
@@ -44,21 +47,17 @@ export function PredictionPanel({
 
   const predictedPrice = useMemo(() => predictNextPrice(candles.map((c) => c.close)), [candles]);
 
-  const lastCandleTime = candles.length > 0 ? candles[candles.length - 1].time : 0;
-  const lastClose = candles.length > 0 ? candles[candles.length - 1].close : 0;
+  useEffect(() => {
+    if (!userDir || !votedAtPrice || !currentPrice) return;
+    if (currentPrice === votedAtPrice || resolvedRef.current) return;
 
-  const newCandleSinceVote =
-    votedCandleTime !== null && lastCandleTime !== 0 && lastCandleTime !== votedCandleTime;
+    resolvedRef.current = true;
+    const correct =
+      (userDir === "up" && currentPrice >= votedAtPrice) ||
+      (userDir === "down" && currentPrice < votedAtPrice);
 
-  const result =
-    newCandleSinceVote && userDir !== null && votedPredicted !== null
-      ? {
-          correct: userDir === "up"
-            ? lastClose >= votedPredicted
-            : lastClose < votedPredicted,
-          actualPrice: lastClose,
-        }
-      : null;
+    setResult({ correct, actualPrice: currentPrice });
+  }, [userDir, votedAtPrice, currentPrice]);
 
   const { data: counts, mutate: refreshCounts } = useSWR(
     voterId
@@ -71,10 +70,11 @@ export function PredictionPanel({
   const handleVote = useCallback(
     async (dir: "up" | "down") => {
       if (!voterId) return;
-      setSubmitting(true);
+      resolvedRef.current = false;
+      setResult(null);
       setUserDir(dir);
-      setVotedPredicted(predictedPrice);
-      setVotedCandleTime(lastCandleTime);
+      setVotedAtPrice(currentPrice);
+      setSubmitting(true);
       try {
         await fetch("/api/predictions/vote", {
           method: "POST",
@@ -91,10 +91,15 @@ export function PredictionPanel({
         setSubmitting(false);
       }
     },
-    [asset.symbol, voterId, predictedPrice, lastCandleTime, refreshCounts],
+    [asset.symbol, voterId, predictedPrice, currentPrice, refreshCounts],
   );
 
   if (predictedPrice <= 0) return null;
+
+  const priceChange =
+    result != null && votedAtPrice != null
+      ? result.actualPrice - votedAtPrice
+      : null;
 
   return (
     <div className="rounded-lg border border-black/10 bg-black/[0.02] p-3 dark:border-white/10 dark:bg-white/[0.02]">
@@ -145,20 +150,18 @@ export function PredictionPanel({
                 )}
               </span>
               <span className="text-zinc-400 dark:text-zinc-500">
-                closed at {formatCurrency(result.actualPrice)}
+                price moved {formatCurrency(Math.abs(priceChange!))} to {formatCurrency(result.actualPrice)}
               </span>
             </span>
             <span className="text-zinc-300 dark:text-zinc-600">|</span>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">New round</span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">Vote again</span>
           </>
         ) : userDir ? (
           <span className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
             <Loader className="h-3 w-3 animate-spin" />
-            Waiting for next {intervalLabel}...
+            Waiting for price move...
           </span>
-        ) : null}
-
-        {!userDir && !result && (
+        ) : (
           <>
             <span className="mr-1 text-xs text-zinc-400 dark:text-zinc-500">Where will it go?</span>
             <button
@@ -167,8 +170,7 @@ export function PredictionPanel({
               disabled={submitting}
               className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 px-2.5 py-1 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-500/10 disabled:opacity-50 dark:text-emerald-300"
             >
-              <TrendingUp className="h-3 w-3" />
-              Up
+              <TrendingUp className="h-3 w-3" /> Up
             </button>
             <button
               type="button"
@@ -176,8 +178,7 @@ export function PredictionPanel({
               disabled={submitting}
               className="inline-flex items-center gap-1 rounded-md border border-red-500/30 px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-500/10 disabled:opacity-50 dark:text-red-300"
             >
-              <TrendingDown className="h-3 w-3" />
-              Down
+              <TrendingDown className="h-3 w-3" /> Down
             </button>
           </>
         )}
@@ -191,8 +192,7 @@ export function PredictionPanel({
               disabled={submitting}
               className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 px-2.5 py-1 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-500/10 disabled:opacity-50 dark:text-emerald-300"
             >
-              <TrendingUp className="h-3 w-3" />
-              Up
+              <TrendingUp className="h-3 w-3" /> Up
             </button>
             <button
               type="button"
@@ -200,8 +200,7 @@ export function PredictionPanel({
               disabled={submitting}
               className="inline-flex items-center gap-1 rounded-md border border-red-500/30 px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-500/10 disabled:opacity-50 dark:text-red-300"
             >
-              <TrendingDown className="h-3 w-3" />
-              Down
+              <TrendingDown className="h-3 w-3" /> Down
             </button>
           </div>
         )}
