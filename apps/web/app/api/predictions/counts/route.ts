@@ -16,7 +16,8 @@ export async function GET(request: Request) {
       .from("predictions")
       .select("*", { count: "exact", head: true })
       .eq("asset_symbol", symbol)
-      .eq("direction", "up");
+      .eq("direction", "up")
+      .is("correct", null);
 
     if (upError) throw upError;
 
@@ -24,7 +25,8 @@ export async function GET(request: Request) {
       .from("predictions")
       .select("*", { count: "exact", head: true })
       .eq("asset_symbol", symbol)
-      .eq("direction", "down");
+      .eq("direction", "down")
+      .is("correct", null);
 
     if (downError) throw downError;
 
@@ -35,6 +37,7 @@ export async function GET(request: Request) {
         .select("direction")
         .eq("asset_symbol", symbol)
         .eq("voter_id", voterId)
+        .is("correct", null)
         .maybeSingle();
 
       userVote = vote ?? null;
