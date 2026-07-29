@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createChart, ColorType, type IChartApi, type ISeriesApi, type UTCTimestamp, type LineStyle } from "lightweight-charts";
+import { createChart, ColorType, LineStyle, type IChartApi, type ISeriesApi, type UTCTimestamp } from "lightweight-charts";
 import { Camera, Code, Maximize2 } from "lucide-react";
 
 function generateIntradayData() {
@@ -66,8 +66,8 @@ export function AreaChart() {
         },
       },
       crosshair: {
-        vertLine: { color: "rgba(0,0,0,0.12)", width: 1, style: 2 as LineStyle, visible: true, labelVisible: true },
-        horzLine: { color: "rgba(0,0,0,0.12)", width: 1, style: 2 as LineStyle, visible: true, labelVisible: true },
+        vertLine: { color: "rgba(0,0,0,0.12)", width: 1, style: LineStyle.Dashed, visible: true, labelVisible: true },
+        horzLine: { color: "rgba(0,0,0,0.12)", width: 1, style: LineStyle.Dashed, visible: true, labelVisible: true },
       },
       handleScroll: false,
       handleScale: false,
@@ -91,10 +91,10 @@ export function AreaChart() {
 
     series.setData(data);
 
-    chart.createPriceLine({
+    series.createPriceLine({
       price: prevClose,
       color: "#6b7280",
-      lineStyle: 2 as LineStyle,
+      lineStyle: LineStyle.Dashed,
       axisLabelVisible: true,
       title: "Prev close",
     });
