@@ -28,9 +28,9 @@ export interface ChatMessage {
   content: string;
 }
 
-/** Which LLM backend powers the chat assistant. "gemini"/"openai"/"anthropic" hit each provider's
+/** Which LLM backend powers the chat assistant. "gemini"/"openai"/"anthropic"/"groq" hit each provider's
  * official API; "custom" hits any OpenAI-compatible endpoint at a user-supplied base URL. */
-export type LlmProvider = "gemini" | "openai" | "anthropic" | "custom";
+export type LlmProvider = "gemini" | "openai" | "anthropic" | "groq" | "custom";
 
 /** A user's Bring-Your-Own-Key chat settings. Persisted client-side only (localStorage) — never
  * sent to or stored by our server beyond the lifetime of a single proxied request. */
@@ -40,6 +40,14 @@ export interface LlmSettings {
   model: string;
   /** Only used when provider is "custom" — base URL of an OpenAI-compatible API. */
   customBaseUrl?: string;
+}
+
+/** A free built-in chat model available without needing a user API key. */
+export interface FreeModel {
+  id: string;
+  label: string;
+  provider: Extract<LlmProvider, "gemini" | "groq">;
+  modelId: string;
 }
 
 export interface CoinListEntry {
