@@ -1,9 +1,10 @@
 "use client";
 
-import type { Candle } from "@crypto-stocks/lib";
+import type { ChartType, Candle } from "@crypto-stocks/lib";
 import {
   ColorType,
   createChart,
+  type AreaData,
   type CandlestickData,
   type IChartApi,
   type ISeriesApi,
@@ -21,77 +22,116 @@ function toCandlestickData(c: Candle): CandlestickData {
   };
 }
 
+function toAreaData(c: Candle): AreaData {
+  return { time: c.time as UTCTimestamp, value: c.close };
+}
+
 export interface PriceChartHandle {
   setData: (candles: Candle[]) => void;
   update: (candle: Candle) => void;
   getData: () => Candle[];
 }
 
+function buildChart(container: HTMLDivElement, timeVisible: boolean, chartType: ChartType) {
+  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  const chart = createChart(container, {
+    width: container.clientWidth,
+    height: 380,
+    layout: {
+      background: { type: ColorType.Solid, color: "transparent" },
+      textColor: isDark ? "#d4d4d8" : "#3f3f46",
+      fontFamily: "var(--font-mono), ui-monospace, monospace",
+    },
+    grid: {
+      vertLines: { color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" },
+      horzLines: { color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" },
+    },
+    timeScale: { timeVisible, secondsVisible: false },
+  });
+
+  const series = chartType === "candlestick"
+    ? chart.addCandlestickSeries({
+        upColor: "#22c55e",
+        downColor: "#ef4444",
+        borderVisible: false,
+        wickUpColor: "#22c55e",
+        wickDownColor: "#ef4444",
+      })
+    : chart.addAreaSeries({
+        lineColor: "#22c55e",
+        topColor: "rgba(34,197,94,0.3)",
+        bottomColor: "rgba(34,197,94,0.01)",
+        lineWidth: 2,
+      });
+
+  const resizeObserver = new ResizeObserver((entries) => {
+    const entry = entries[0];
+    if (entry) chart.applyOptions({ width: entry.contentRect.width });
+  });
+  resizeObserver.observe(container);
+
+  return { chart, series, resizeObserver };
+}
+
 export function PriceChart({
   onReady,
   timeVisible = true,
+  chartType = "candlestick",
 }: {
   onReady: (handle: PriceChartHandle) => void;
-  /** Show time-of-day on the axis (intraday ranges) vs. date-only (daily+ candles). */
   timeVisible?: boolean;
+  chartType?: ChartType;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const seriesRef = useRef<ISeriesApi<"Candlestick"> | ISeriesApi<"Area"> | null>(null);
   const candlesRef = useRef<Candle[]>([]);
+  const roRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-    const chart = createChart(container, {
-      width: container.clientWidth,
-      height: 380,
-      layout: {
-        background: { type: ColorType.Solid, color: "transparent" },
-        textColor: isDark ? "#d4d4d8" : "#3f3f46",
-        fontFamily: "var(--font-mono), ui-monospace, monospace",
-      },
-      grid: {
-        vertLines: { color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" },
-        horzLines: { color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" },
-      },
-      timeScale: { timeVisible, secondsVisible: false },
-    });
-
-    const series = chart.addCandlestickSeries({
-      upColor: "#22c55e",
-      downColor: "#ef4444",
-      borderVisible: false,
-      wickUpColor: "#22c55e",
-      wickDownColor: "#ef4444",
-    });
-
+    const { chart, series, resizeObserver } = buildChart(container, timeVisible, chartType);
     chartRef.current = chart;
     seriesRef.current = series;
+    roRef.current = resizeObserver;
+
+    if (candlesRef.current.length > 0) {
+      series.setData(
+        chartType === "candlestick"
+          ? candlesRef.current.map(toCandlestickData)
+          : candlesRef.current.map(toAreaData),
+      );
+    }
 
     onReady({
       setData: (candles) => {
         candlesRef.current = candles;
-        series.setData(candles.map(toCandlestickData));
+        const s = seriesRef.current;
+        if (!s) return;
+        if (chartType === "candlestick") {
+          (s as ISeriesApi<"Candlestick">).setData(candles.map(toCandlestickData));
+        } else {
+          (s as ISeriesApi<"Area">).setData(candles.map(toAreaData));
+        }
       },
       update: (candle) => {
         const current = candlesRef.current;
         const last = current[current.length - 1];
         candlesRef.current =
           last && last.time === candle.time ? [...current.slice(0, -1), candle] : [...current, candle];
-        series.update(toCandlestickData(candle));
+        const s = seriesRef.current;
+        if (!s) return;
+        if (chartType === "candlestick") {
+          (s as ISeriesApi<"Candlestick">).update(toCandlestickData(candle));
+        } else {
+          (s as ISeriesApi<"Area">).update(toAreaData(candle));
+        }
       },
       getData: () => candlesRef.current,
     });
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry) chart.applyOptions({ width: entry.contentRect.width });
-    });
-    resizeObserver.observe(container);
 
     return () => {
       resizeObserver.disconnect();
@@ -100,7 +140,7 @@ export function PriceChart({
       seriesRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [chartType]);
 
   useEffect(() => {
     chartRef.current?.applyOptions({ timeScale: { timeVisible } });
