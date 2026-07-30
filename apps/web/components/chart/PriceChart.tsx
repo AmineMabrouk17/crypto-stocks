@@ -1,9 +1,10 @@
 "use client";
 
-import type { Candle } from "@crypto-stocks/lib";
+import type { ChartType, Candle } from "@crypto-stocks/lib";
 import {
   ColorType,
   createChart,
+  type AreaData,
   type CandlestickData,
   type IChartApi,
   type ISeriesApi,
@@ -21,6 +22,10 @@ function toCandlestickData(c: Candle): CandlestickData {
   };
 }
 
+function toAreaData(c: Candle): AreaData {
+  return { time: c.time as UTCTimestamp, value: c.close };
+}
+
 export interface PriceChartHandle {
   setData: (candles: Candle[]) => void;
   update: (candle: Candle) => void;
@@ -30,14 +35,15 @@ export interface PriceChartHandle {
 export function PriceChart({
   onReady,
   timeVisible = true,
+  chartType = "candlestick",
 }: {
   onReady: (handle: PriceChartHandle) => void;
-  /** Show time-of-day on the axis (intraday ranges) vs. date-only (daily+ candles). */
   timeVisible?: boolean;
+  chartType?: ChartType;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const seriesRef = useRef<ISeriesApi<"Candlestick"> | ISeriesApi<"Area"> | null>(null);
   const candlesRef = useRef<Candle[]>([]);
 
   useEffect(() => {
@@ -61,28 +67,56 @@ export function PriceChart({
       timeScale: { timeVisible, secondsVisible: false },
     });
 
-    const series = chart.addCandlestickSeries({
-      upColor: "#22c55e",
-      downColor: "#ef4444",
-      borderVisible: false,
-      wickUpColor: "#22c55e",
-      wickDownColor: "#ef4444",
-    });
+    function addSeries(type: ChartType) {
+      if (type === "candlestick") {
+        return chart.addCandlestickSeries({
+          upColor: "#22c55e",
+          downColor: "#ef4444",
+          borderVisible: false,
+          wickUpColor: "#22c55e",
+          wickDownColor: "#ef4444",
+        });
+      }
+      return chart.addAreaSeries({
+        lineColor: "#22c55e",
+        topColor: "rgba(34,197,94,0.3)",
+        bottomColor: "rgba(34,197,94,0.01)",
+        lineWidth: 2,
+      });
+    }
+
+    let series = addSeries(chartType);
+    seriesRef.current = series;
+
+    if (candlesRef.current.length > 0) {
+      if (chartType === "candlestick") {
+        (series as ISeriesApi<"Candlestick">).setData(candlesRef.current.map(toCandlestickData));
+      } else {
+        (series as ISeriesApi<"Area">).setData(candlesRef.current.map(toAreaData));
+      }
+    }
 
     chartRef.current = chart;
-    seriesRef.current = series;
 
     onReady({
       setData: (candles) => {
         candlesRef.current = candles;
-        series.setData(candles.map(toCandlestickData));
+        if (chartType === "candlestick") {
+          (series as ISeriesApi<"Candlestick">).setData(candles.map(toCandlestickData));
+        } else {
+          (series as ISeriesApi<"Area">).setData(candles.map(toAreaData));
+        }
       },
       update: (candle) => {
         const current = candlesRef.current;
         const last = current[current.length - 1];
         candlesRef.current =
           last && last.time === candle.time ? [...current.slice(0, -1), candle] : [...current, candle];
-        series.update(toCandlestickData(candle));
+        if (chartType === "candlestick") {
+          (series as ISeriesApi<"Candlestick">).update(toCandlestickData(candle));
+        } else {
+          (series as ISeriesApi<"Area">).update(toAreaData(candle));
+        }
       },
       getData: () => candlesRef.current,
     });
@@ -105,6 +139,37 @@ export function PriceChart({
   useEffect(() => {
     chartRef.current?.applyOptions({ timeScale: { timeVisible } });
   }, [timeVisible]);
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    const series = seriesRef.current;
+    if (!chart || !series) return;
+
+    const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    if (chartType === "candlestick") {
+      const candleSeries = chart.addCandlestickSeries({
+        upColor: "#22c55e",
+        downColor: "#ef4444",
+        borderVisible: false,
+        wickUpColor: "#22c55e",
+        wickDownColor: "#ef4444",
+      });
+      candleSeries.setData(candlesRef.current.map(toCandlestickData));
+      chart.removeSeries(series);
+      seriesRef.current = candleSeries;
+    } else {
+      const areaSeries = chart.addAreaSeries({
+        lineColor: "#22c55e",
+        topColor: "rgba(34,197,94,0.3)",
+        bottomColor: "rgba(34,197,94,0.01)",
+        lineWidth: 2,
+      });
+      areaSeries.setData(candlesRef.current.map(toAreaData));
+      chart.removeSeries(series);
+      seriesRef.current = areaSeries;
+    }
+  }, [chartType]);
 
   return <div ref={containerRef} className="w-full" />;
 }
