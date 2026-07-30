@@ -8,7 +8,6 @@ import {
   type AssetRef,
   type Candle,
   type ChartRange,
-  type ChartType,
   type DayStats,
 } from "@crypto-stocks/lib";
 import { Download, ExternalLink } from "lucide-react";

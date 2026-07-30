@@ -85,7 +85,7 @@ export function PriceChart({
       });
     }
 
-    let series = addSeries(chartType);
+    const series = addSeries(chartType);
     seriesRef.current = series;
 
     if (candlesRef.current.length > 0) {
@@ -144,8 +144,6 @@ export function PriceChart({
     const chart = chartRef.current;
     const series = seriesRef.current;
     if (!chart || !series) return;
-
-    const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
     if (chartType === "candlestick") {
       const candleSeries = chart.addCandlestickSeries({
