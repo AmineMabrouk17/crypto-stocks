@@ -1,4 +1,6 @@
 import {
+  FREE_MODELS,
+  GROQ_API_BASE,
   formatCurrency,
   generateChatReply,
   generateChatReplyAnthropic,
@@ -23,16 +25,16 @@ interface ChatRequestBody {
   /** Optional BYOK settings from the client. When present, the request is routed to the
    * user's chosen provider using their own key instead of the server's default Gemini key. */
   llmSettings?: LlmSettings | null;
+  /** ID of a free built-in model (from FREE_MODELS) to use. Ignored when llmSettings is set. */
+  freeModelId?: string | null;
 }
 
-export async function POST(request: Request) {
-  const body = (await request.json()) as ChatRequestBody;
-  const { messages, asset, livePrice, marketStats, description, llmSettings } = body;
-
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return NextResponse.json({ error: "messages is required" }, { status: 400 });
-  }
-
+function buildSystemInstruction(
+  asset: ChatRequestBody["asset"],
+  livePrice: number | null,
+  marketStats: MarketStats | null,
+  description: string | null,
+): string {
   const priceLine =
     livePrice != null
       ? `Current live price: ${formatCurrency(livePrice)}.`
@@ -53,7 +55,7 @@ export async function POST(request: Request) {
           .join(", ")
       : "";
 
-  const systemInstruction = [
+  return [
     "You are a concise financial assistant embedded in a live crypto/stocks dashboard.",
     `The user currently has ${asset.name} (${asset.symbol}, a ${asset.kind === "crypto" ? "cryptocurrency" : "stock/ETF"}) selected.`,
     priceLine,
@@ -63,14 +65,23 @@ export async function POST(request: Request) {
   ]
     .filter(Boolean)
     .join(" ");
+}
+
+export async function POST(request: Request) {
+  const body = (await request.json()) as ChatRequestBody;
+  const { messages, asset, livePrice, marketStats, description, llmSettings, freeModelId } = body;
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return NextResponse.json({ error: "messages is required" }, { status: 400 });
+  }
+
+  const systemInstruction = buildSystemInstruction(asset, livePrice, marketStats, description);
 
   try {
     let reply: string;
 
-    // BYOK path: the user supplied their own provider + key from the settings panel. This
-    // request is a stateless passthrough — the key is used for exactly this call and never
-    // logged, echoed back, or persisted server-side.
     if (llmSettings?.apiKey) {
+      // BYOK path: the user supplied their own provider + key from the settings panel.
       switch (llmSettings.provider) {
         case "openai":
           reply = await generateChatReplyOpenAI(
@@ -84,6 +95,15 @@ export async function POST(request: Request) {
         case "anthropic":
           reply = await generateChatReplyAnthropic(
             llmSettings.apiKey,
+            llmSettings.model,
+            systemInstruction,
+            messages,
+          );
+          break;
+        case "groq":
+          reply = await generateChatReplyOpenAI(
+            llmSettings.apiKey,
+            GROQ_API_BASE,
             llmSettings.model,
             systemInstruction,
             messages,
@@ -109,8 +129,43 @@ export async function POST(request: Request) {
           reply = await generateChatReply(llmSettings.apiKey, systemInstruction, messages);
           break;
       }
+    } else if (freeModelId) {
+      // Free built-in model path: route to the provider using server-side env vars.
+      const model = FREE_MODELS.find((m) => m.id === freeModelId);
+      if (!model) {
+        return NextResponse.json(
+          { error: `Unknown free model: ${freeModelId}` },
+          { status: 400 },
+        );
+      }
+
+      switch (model.provider) {
+        case "groq": {
+          const apiKey = process.env.GROQ_API_KEY;
+          if (!apiKey) {
+            return NextResponse.json(
+              { error: "GROQ_API_KEY is not configured on the server" },
+              { status: 500 },
+            );
+          }
+          reply = await generateChatReplyOpenAI(apiKey, GROQ_API_BASE, model.modelId, systemInstruction, messages);
+          break;
+        }
+        case "gemini":
+        default: {
+          const apiKey = process.env.GEMINI_API_KEY;
+          if (!apiKey) {
+            return NextResponse.json(
+              { error: "GEMINI_API_KEY is not configured on the server" },
+              { status: 500 },
+            );
+          }
+          reply = await generateChatReply(apiKey, systemInstruction, messages, model.modelId);
+          break;
+        }
+      }
     } else {
-      // Default path: no BYOK settings — use the app's server-side Gemini key.
+      // Default path: no BYOK and no freeModelId — use the app's server-side Gemini key.
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
         return NextResponse.json(

@@ -52,7 +52,7 @@ export function DashboardGrid() {
           </button>
         </div>
       ) : (
-        <aside className="min-h-[420px] lg:min-h-0">
+        <aside className="h-[380px]">
           <ChatPanel
             key={assetKey}
             asset={selected}

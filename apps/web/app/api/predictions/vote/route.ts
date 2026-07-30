@@ -3,9 +3,9 @@ import { getSupabase } from "@/lib/supabase";
 
 export async function POST(request: Request) {
   const supabase = getSupabase();
-  const { asset_symbol, direction, predicted_price, voter_id } = await request.json();
+  const { asset_symbol, direction, voter_id } = await request.json();
 
-  if (!asset_symbol || !direction || predicted_price == null || !voter_id) {
+  if (!asset_symbol || !direction || !voter_id) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -14,15 +14,24 @@ export async function POST(request: Request) {
   }
 
   try {
-    await supabase
+    const { data: existing } = await supabase
       .from("predictions")
-      .delete()
+      .select("id")
       .eq("asset_symbol", asset_symbol)
-      .eq("voter_id", voter_id);
+      .eq("voter_id", voter_id)
+      .is("resolved_at", null)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from("predictions")
+        .update({ resolved_at: new Date().toISOString() })
+        .eq("id", existing.id);
+    }
 
     const { data, error } = await supabase
       .from("predictions")
-      .insert({ asset_symbol, direction, predicted_price, voter_id })
+      .insert({ asset_symbol, direction, voter_id, predicted_price: 0 })
       .select()
       .single();
 
