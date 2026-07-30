@@ -2,7 +2,8 @@
 
 import type { AssetRef, Candle } from "@crypto-stocks/lib";
 import { formatCurrency } from "@crypto-stocks/lib";
-import { TrendingUp, TrendingDown, Check, X, Loader } from "lucide-react";
+import { TrendingUp, TrendingDown, Check, X, Loader, ArrowUpRight } from "lucide-react";
+import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { useVoterId } from "@/lib/useVoterId";
@@ -57,7 +58,7 @@ export function PredictionPanel({
       ? `/api/predictions/counts?symbol=${asset.symbol}&voter_id=${voterId}`
       : null,
     fetcher,
-    { refreshInterval: 10_000 },
+    { refreshInterval: 5_000 },
   );
 
   useEffect(() => {
@@ -113,7 +114,7 @@ export function PredictionPanel({
     [asset.symbol, voterId, currentPrice, refreshCounts, resolvePrediction],
   );
 
-  const priceChange =
+  const priceDiff =
     result != null && votedAtPrice != null
       ? result.actualPrice - votedAtPrice
       : null;
@@ -130,13 +131,47 @@ export function PredictionPanel({
           </span>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1 font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
-            <TrendingUp className="h-3 w-3" />
-            {counts?.up ?? 0}
+          <span className="group relative">
+            <span className="flex items-center gap-1 font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="h-3 w-3" />
+              <motion.span
+                key={counts?.up ?? 0}
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.25, 1] }}
+                transition={{ duration: 0.25 }}
+              >
+                {counts?.up ?? 0}
+              </motion.span>
+              {counts?.userVote?.direction === "up" && (
+                <span className="rounded bg-emerald-500/15 px-1 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  You
+                </span>
+              )}
+            </span>
+            <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-zinc-100 dark:text-zinc-900">
+              Predicting Up
+            </span>
           </span>
-          <span className="flex items-center gap-1 font-mono tabular-nums text-red-600 dark:text-red-400">
-            <TrendingDown className="h-3 w-3" />
-            {counts?.down ?? 0}
+          <span className="group relative">
+            <span className="flex items-center gap-1 font-mono tabular-nums text-red-600 dark:text-red-400">
+              <TrendingDown className="h-3 w-3" />
+              <motion.span
+                key={counts?.down ?? 0}
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.25, 1] }}
+                transition={{ duration: 0.25 }}
+              >
+                {counts?.down ?? 0}
+              </motion.span>
+              {counts?.userVote?.direction === "down" && (
+                <span className="rounded bg-red-500/15 px-1 text-[9px] font-semibold text-red-600 dark:text-red-400">
+                  You
+                </span>
+              )}
+            </span>
+            <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-zinc-100 dark:text-zinc-900">
+              Predicting Down
+            </span>
           </span>
         </div>
       </div>
@@ -144,7 +179,7 @@ export function PredictionPanel({
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {result ? (
           <>
-            <span className="flex items-center gap-1.5 text-xs">
+            <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 text-xs">
               <span
                 className={cn(
                   "flex items-center gap-1 font-semibold",
@@ -159,17 +194,53 @@ export function PredictionPanel({
                   <><X className="h-3.5 w-3.5" /> Wrong</>
                 )}
               </span>
+              {votedAtPrice != null && (
+                <span className="text-zinc-400 dark:text-zinc-500">
+                  baseline was {formatCurrency(votedAtPrice)}
+                </span>
+              )}
               <span className="text-zinc-400 dark:text-zinc-500">
-                price moved {formatCurrency(Math.abs(priceChange!))} to {formatCurrency(result.actualPrice)}
+                <ArrowUpRight className="mr-0.5 inline h-3 w-3" />
+                closed {formatCurrency(result.actualPrice)}
               </span>
-            </span>
-            <span className="text-zinc-300 dark:text-zinc-600">|</span>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">Predict again</span>
+              {priceDiff != null && (
+                <span
+                  className={cn(
+                    "font-mono",
+                    priceDiff >= 0
+                      ? "text-emerald-500 dark:text-emerald-400"
+                      : "text-red-500 dark:text-red-400",
+                  )}
+                >
+                  {priceDiff >= 0 ? "+" : ""}
+                  {formatCurrency(priceDiff)}
+                </span>
+              )}
+            </div>
+            <div className="mt-1.5 flex w-full items-center gap-1.5">
+              <span className="text-xs text-zinc-400 dark:text-zinc-500">Predict again:</span>
+              <button
+                type="button"
+                onClick={() => handleVote("up")}
+                disabled={submitting}
+                className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 px-2.5 py-1 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-500/10 disabled:opacity-50 dark:text-emerald-300"
+              >
+                <TrendingUp className="h-3 w-3" /> Up
+              </button>
+              <button
+                type="button"
+                onClick={() => handleVote("down")}
+                disabled={submitting}
+                className="inline-flex items-center gap-1 rounded-md border border-red-500/30 px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-500/10 disabled:opacity-50 dark:text-red-300"
+              >
+                <TrendingDown className="h-3 w-3" /> Down
+              </button>
+            </div>
           </>
         ) : userDir ? (
           <span className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
             <Loader className="h-3 w-3 animate-spin" />
-            Waiting for 5m close...
+            Predicting {userDir === "up" ? "Up" : "Down"} — waiting for 5m close...
           </span>
         ) : (
           <>
@@ -191,28 +262,6 @@ export function PredictionPanel({
               <TrendingDown className="h-3 w-3" /> Down
             </button>
           </>
-        )}
-
-        {result && (
-          <div className="flex items-center gap-1">
-            <span className="mr-1 text-xs text-zinc-400 dark:text-zinc-500">Next:</span>
-            <button
-              type="button"
-              onClick={() => handleVote("up")}
-              disabled={submitting}
-              className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 px-2.5 py-1 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-500/10 disabled:opacity-50 dark:text-emerald-300"
-            >
-              <TrendingUp className="h-3 w-3" /> Up
-            </button>
-            <button
-              type="button"
-              onClick={() => handleVote("down")}
-              disabled={submitting}
-              className="inline-flex items-center gap-1 rounded-md border border-red-500/30 px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-500/10 disabled:opacity-50 dark:text-red-300"
-            >
-              <TrendingDown className="h-3 w-3" /> Down
-            </button>
-          </div>
         )}
       </div>
     </div>
