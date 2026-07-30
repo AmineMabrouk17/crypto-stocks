@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from("predictions")
-      .insert({ asset_symbol, direction, voter_id })
+      .insert({ asset_symbol, direction, voter_id, predicted_price: 0 })
       .select()
       .single();
 
