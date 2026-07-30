@@ -6,6 +6,10 @@ export function isChartRange(value: string | null | undefined): value is ChartRa
   return !!value && (CHART_RANGES as string[]).includes(value);
 }
 
+export type ChartType = "area" | "candlestick";
+
+export const CHART_TYPES: ChartType[] = ["area", "candlestick"];
+
 export interface BinanceRangeConfig {
   interval: string;
   limit: number;

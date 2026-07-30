@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CHART_TYPES,
   decimalsForPrice,
   formatCurrency,
   formatNumber,
@@ -13,6 +14,8 @@ import { Download, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useChartRange } from "@/lib/useChartRange";
+import { useChartType } from "@/lib/useChartType";
+import { SharedLayoutBg } from "../motion/shared-layout-bg";
 import { AnimatedBadge, type AnimatedBadgeStatus } from "../motion/animated-badge";
 import { Loader } from "../motion/loader";
 import { NumberTicker } from "../motion/number-ticker";
@@ -176,6 +179,7 @@ function exportCandlesToCsv(asset: AssetRef, range: ChartRange, candles: Candle[
 export function AssetChartPanel({ asset }: { asset: AssetRef }) {
   const [chartHandle, setChartHandle] = useState<PriceChartHandle | null>(null);
   const { range, setRange } = useChartRange();
+  const [chartType, setChartType] = useChartType();
   const handleReady = useCallback((handle: PriceChartHandle) => setChartHandle(handle), []);
 
   const { setLivePrice, setMarketStats } = useSelectedAsset();
@@ -229,7 +233,23 @@ export function AssetChartPanel({ asset }: { asset: AssetRef }) {
       <AssetHeader asset={asset} status={status} price={price} />
       <StatsRow stats={dayStats} windowLabel={windowLabel} />
       <div className="flex items-center justify-between gap-2">
-        <ChartRangeSelector range={range} onChange={setRange} />
+        <div className="flex items-center gap-2">
+          <ChartRangeSelector range={range} onChange={setRange} />
+          <SharedLayoutBg className="flex-row gap-0" pillClassName="bg-primary/[0.08] dark:bg-primary/[0.12]" inset={2}>
+            {CHART_TYPES.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setChartType(t)}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium ${
+                  chartType === t ? "bg-foreground text-background" : "text-zinc-500 dark:text-zinc-400"
+                }`}
+              >
+                {t === "area" ? "Area" : "Candle"}
+              </button>
+            ))}
+          </SharedLayoutBg>
+        </div>
         <div className="flex items-center gap-1">
           <PriceAlertPanel asset={asset} price={price} />
           <button
@@ -251,7 +271,7 @@ export function AssetChartPanel({ asset }: { asset: AssetRef }) {
             <Loader variant="dots" size={28} />
           </div>
         )}
-        <PriceChart onReady={handleReady} timeVisible={range === "1D" || range === "1W"} />
+        <PriceChart onReady={handleReady} timeVisible={range === "1D" || range === "1W"} chartType={chartType} />
       </div>
     </div>
   );
