@@ -15,8 +15,12 @@ function subscribe(callback: () => void) {
   return () => window.removeEventListener("storage", callback);
 }
 
+function getServerSnapshot(): ChartType {
+  return "candlestick";
+}
+
 export function useChartType(): [ChartType, (type: ChartType) => void] {
-  const chartType = useSyncExternalStore(subscribe, getSnapshot);
+  const chartType = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const setChartType = useCallback((type: ChartType) => {
     localStorage.setItem(STORAGE_KEY, type);
