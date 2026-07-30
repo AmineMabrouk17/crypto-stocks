@@ -94,6 +94,19 @@ export interface PriceAlert {
   triggeredAt: number | null;
 }
 
+export type PredictedDirection = "UP" | "DOWN" | "NEUTRAL";
+
+export interface FiveMinuteForecast {
+  symbol: string;
+  predictedDirection: PredictedDirection;
+  timestampStart: number;
+  timestampTarget: number;
+  priceAtPrediction: number;
+  actualPriceAt5m?: number;
+  isDirectionCorrect?: boolean;
+  status: "PENDING" | "COMPLETED" | "EXPIRED";
+}
+
 export interface NewsArticle {
   title: string;
   link: string;
