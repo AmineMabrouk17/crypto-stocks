@@ -45,6 +45,8 @@ export function PriceChart({
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | ISeriesApi<"Area"> | null>(null);
   const candlesRef = useRef<Candle[]>([]);
+  const chartTypeRef = useRef(chartType);
+  chartTypeRef.current = chartType;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -85,11 +87,12 @@ export function PriceChart({
       });
     }
 
-    const series = addSeries(chartType);
+    const series = addSeries(chartTypeRef.current);
     seriesRef.current = series;
 
     if (candlesRef.current.length > 0) {
-      if (chartType === "candlestick") {
+      const type = chartTypeRef.current;
+      if (type === "candlestick") {
         (series as ISeriesApi<"Candlestick">).setData(candlesRef.current.map(toCandlestickData));
       } else {
         (series as ISeriesApi<"Area">).setData(candlesRef.current.map(toAreaData));
@@ -101,10 +104,13 @@ export function PriceChart({
     onReady({
       setData: (candles) => {
         candlesRef.current = candles;
-        if (chartType === "candlestick") {
-          (series as ISeriesApi<"Candlestick">).setData(candles.map(toCandlestickData));
+        const s = seriesRef.current;
+        if (!s) return;
+        const type = chartTypeRef.current;
+        if (type === "candlestick") {
+          (s as ISeriesApi<"Candlestick">).setData(candles.map(toCandlestickData));
         } else {
-          (series as ISeriesApi<"Area">).setData(candles.map(toAreaData));
+          (s as ISeriesApi<"Area">).setData(candles.map(toAreaData));
         }
       },
       update: (candle) => {
@@ -112,10 +118,13 @@ export function PriceChart({
         const last = current[current.length - 1];
         candlesRef.current =
           last && last.time === candle.time ? [...current.slice(0, -1), candle] : [...current, candle];
-        if (chartType === "candlestick") {
-          (series as ISeriesApi<"Candlestick">).update(toCandlestickData(candle));
+        const s = seriesRef.current;
+        if (!s) return;
+        const type = chartTypeRef.current;
+        if (type === "candlestick") {
+          (s as ISeriesApi<"Candlestick">).update(toCandlestickData(candle));
         } else {
-          (series as ISeriesApi<"Area">).update(toAreaData(candle));
+          (s as ISeriesApi<"Area">).update(toAreaData(candle));
         }
       },
       getData: () => candlesRef.current,
