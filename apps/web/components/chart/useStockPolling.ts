@@ -38,7 +38,9 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export function useStockPolling(symbol: string, range: ChartRange, chart: PriceChartHandle | null) {
   const { range: yahooRange, interval } = yahooRangeConfig(range);
   const { data, error } = useSWR<YahooQuoteResponse>(
-    `/api/stocks/quote?symbol=${encodeURIComponent(symbol)}&range=${yahooRange}&interval=${interval}`,
+    symbol
+      ? `/api/stocks/quote?symbol=${encodeURIComponent(symbol)}&range=${yahooRange}&interval=${interval}`
+      : null,
     fetcher,
     { refreshInterval: stockPollingIntervalMs(range), revalidateOnFocus: true },
   );
