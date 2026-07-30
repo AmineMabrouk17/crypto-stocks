@@ -46,7 +46,7 @@ export function PriceChart({
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | ISeriesApi<"Area"> | null>(null);
   const candlesRef = useRef<Candle[]>([]);
   const chartTypeRef = useRef(chartType);
-  chartTypeRef.current = chartType;
+  useEffect(() => { chartTypeRef.current = chartType; }, [chartType]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -151,8 +151,8 @@ export function PriceChart({
 
   useEffect(() => {
     const chart = chartRef.current;
-    const series = seriesRef.current;
-    if (!chart || !series) return;
+    const prevSeries = seriesRef.current;
+    if (!chart || !prevSeries) return;
 
     if (chartType === "candlestick") {
       const candleSeries = chart.addCandlestickSeries({
@@ -163,7 +163,7 @@ export function PriceChart({
         wickDownColor: "#ef4444",
       });
       candleSeries.setData(candlesRef.current.map(toCandlestickData));
-      chart.removeSeries(series);
+      chart.removeSeries(prevSeries);
       seriesRef.current = candleSeries;
     } else {
       const areaSeries = chart.addAreaSeries({
@@ -173,9 +173,11 @@ export function PriceChart({
         lineWidth: 2,
       });
       areaSeries.setData(candlesRef.current.map(toAreaData));
-      chart.removeSeries(series);
+      chart.removeSeries(prevSeries);
       seriesRef.current = areaSeries;
     }
+
+    chart.timeScale().fitContent();
   }, [chartType]);
 
   return <div ref={containerRef} className="w-full" />;
