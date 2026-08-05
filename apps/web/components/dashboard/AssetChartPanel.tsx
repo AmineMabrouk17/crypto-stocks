@@ -20,6 +20,7 @@ import { AnimatedBadge, type AnimatedBadgeStatus } from "../motion/animated-badg
 import { Loader } from "../motion/loader";
 import { NumberTicker } from "../motion/number-ticker";
 import { ChartRangeSelector } from "../chart/ChartRangeSelector";
+import { MarketSignals } from "../chart/MarketSignals";
 import { PriceChart, type PriceChartHandle } from "../chart/PriceChart";
 import { useCrypto24hStats } from "../chart/useCrypto24hStats";
 import { useCryptoKlineStream } from "../chart/useCryptoKlineStream";
@@ -271,6 +272,7 @@ export function AssetChartPanel({ asset }: { asset: AssetRef }) {
         )}
         <PriceChart onReady={handleReady} timeVisible={range === "1D" || range === "1W"} chartType={chartType} />
       </div>
+      <MarketSignals asset={asset} />
     </div>
   );
 }

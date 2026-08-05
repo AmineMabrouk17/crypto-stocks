@@ -6,7 +6,8 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "tsc": "turbo run tsc"
+    "tsc": "turbo run tsc",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "turbo": "^2.10.7",
