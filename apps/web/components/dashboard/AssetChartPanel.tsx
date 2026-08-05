@@ -27,7 +27,6 @@ import { useStockDayStats } from "../chart/useStockDayStats";
 import { useStockPolling } from "../chart/useStockPolling";
 import { useSelectedAsset } from "../providers/SelectedAssetContext";
 import { PriceAlertPanel } from "./PriceAlertPanel";
-import { PredictionPanel } from "./PredictionPanel";
 
 const STATUS_TO_BADGE: Record<"connecting" | "open" | "closed", AnimatedBadgeStatus> = {
   connecting: "loading",
@@ -264,7 +263,6 @@ export function AssetChartPanel({ asset }: { asset: AssetRef }) {
           </button>
         </div>
       </div>
-      <PredictionPanel asset={asset} candles={chartHandle?.getData() ?? []} currentPrice={price} />
       <div className="relative">
         {streamSeeding && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/60 backdrop-blur-sm dark:bg-zinc-950/60">
