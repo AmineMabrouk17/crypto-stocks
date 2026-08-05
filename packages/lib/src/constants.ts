@@ -9,6 +9,8 @@ export const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
 export const YAHOO_QUERY_BASE = "https://query1.finance.yahoo.com";
 export const YAHOO_FC_BASE = "https://fc.yahoo.com";
 
+export const ALTERNATIVE_ME_FNG_BASE = "https://api.alternative.me/fng";
+
 export const GEMINI_MODEL = "gemini-flash-latest";
 export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 

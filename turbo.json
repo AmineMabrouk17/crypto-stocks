@@ -14,6 +14,9 @@
     },
     "tsc": {
       "dependsOn": ["^tsc"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
     }
   }
 }
