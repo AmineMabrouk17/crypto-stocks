@@ -1,6 +1,7 @@
 "use client";
 
 import type { AssetRef } from "@crypto-stocks/lib";
+import { CrowdOdds } from "./CrowdOdds";
 import { SentimentIndex } from "./SentimentIndex";
 
 /**
@@ -13,6 +14,7 @@ export function MarketSignals({ asset }: { asset: AssetRef }) {
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
+      <CrowdOdds symbol={asset.symbol} />
       <SentimentIndex />
     </div>
   );
