@@ -12,11 +12,18 @@ export default function Home() {
   return (
     <div className="flex w-full flex-1 flex-col">
       <header className="flex items-center justify-between border-b border-black/10 px-4 py-3 dark:border-white/15">
-        <div>
-          <h1 className="text-lg font-semibold">Crypto & Stocks Dashboard</h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Real-time crypto via Binance, near-real-time stocks/ETFs via Yahoo Finance.
-          </p>
+        <div className="flex items-center gap-3">
+          <img
+            src="/logo.svg"
+            alt="Crypto & Stocks Dashboard logo"
+            className="h-10 w-10 shrink-0"
+          />
+          <div>
+            <h1 className="text-lg font-semibold">Crypto & Stocks Dashboard</h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Real-time crypto via Binance, near-real-time stocks/ETFs via Yahoo Finance.
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
