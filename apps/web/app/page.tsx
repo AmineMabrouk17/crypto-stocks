@@ -1,14 +1,16 @@
 "use client";
 
-import { Settings } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, Settings } from "lucide-react";
 import { Suspense, useState } from "react";
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
 import { AssetSearchBar } from "@/components/dashboard/AssetSearchBar";
 import { ThemeToggle } from "@/components/motion/theme-toggle";
 import { LlmSettingsPanel } from "@/components/settings/LlmSettingsPanel";
+import { useWatchlistVisible } from "@/lib/useWatchlistVisible";
 
 export default function Home() {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { visible: watchlistVisible, setVisible: setWatchlistVisible } = useWatchlistVisible();
 
   return (
     <div className="flex w-full flex-1 flex-col">
@@ -38,6 +40,20 @@ export default function Home() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setWatchlistVisible(!watchlistVisible)}
+              aria-label={watchlistVisible ? "Hide watchlist sidebar" : "Show watchlist sidebar"}
+              title={watchlistVisible ? "Hide watchlist" : "Show watchlist"}
+              aria-pressed={watchlistVisible}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-white/50 text-zinc-600 shadow-sm transition hover:bg-black/5 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:bg-white/[0.06]"
+            >
+              {watchlistVisible ? (
+                <PanelLeftClose className="h-4 w-4" />
+              ) : (
+                <PanelLeftOpen className="h-4 w-4" />
+              )}
+            </button>
             <button
               type="button"
               onClick={() => setSettingsOpen(true)}

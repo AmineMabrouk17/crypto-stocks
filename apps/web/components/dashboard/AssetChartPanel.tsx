@@ -67,11 +67,6 @@ function AssetHeader({
     <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-500 to-emerald-400 p-[1px] shadow-glow-accent">
-            <span className="flex h-full w-full items-center justify-center rounded-[11px] bg-bento-surface font-mono text-sm font-bold text-emerald-400">
-              {asset.symbol.charAt(0)}
-            </span>
-          </span>
           <h2 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xl font-bold tracking-tight text-zinc-900 lg:text-2xl dark:text-white">
             {asset.name}
             <span className="font-mono text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">
