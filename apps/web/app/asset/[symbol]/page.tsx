@@ -35,20 +35,24 @@ export default async function AssetPage({ params, searchParams }: AssetPageProps
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between border-b border-black/10 px-4 py-3 dark:border-white/15">
-        <div>
-          <Link href="/" className="text-sm text-zinc-500 hover:underline dark:text-zinc-400">
-            ← Back to dashboard
-          </Link>
-          <h1 className="text-lg font-semibold">Crypto & Stocks Dashboard</h1>
+      <header className="sticky top-0 z-50 border-b border-black/[0.06] bg-white/70 backdrop-blur-xl transition-all dark:border-white/[0.06] dark:bg-bento-bg/75">
+        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-4 py-3 lg:px-8">
+          <div>
+            <Link href="/" className="font-mono text-sm text-zinc-500 hover:text-zinc-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200">
+              ← Back to dashboard
+            </Link>
+            <h1 className="text-lg font-semibold">Crypto & Stocks Dashboard</h1>
+          </div>
+          <ThemeToggle
+            variant="circle"
+            start="top-right"
+            iconClassName="h-4 w-4"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-white/50 text-zinc-600 shadow-sm transition hover:bg-black/5 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:bg-white/[0.06]"
+          />
         </div>
-        <ThemeToggle
-          variant="circle"
-          start="top-right"
-          className="rounded-full border border-black/10 bg-white p-2 dark:border-white/15 dark:bg-zinc-900"
-        />
       </header>
       <AssetDetailView asset={asset} />
     </div>
   );
 }
+

@@ -52,104 +52,129 @@ function AssetHeader({
   asset,
   status,
   price,
+  stats,
+  statsWindowLabel,
 }: {
   asset: AssetRef;
   status: "connecting" | "open" | "closed";
   price: number | null;
+  stats: DayStats;
+  statsWindowLabel: string;
 }) {
-  return (
-    <div className="flex items-start justify-between">
-      <h2 className="flex items-center gap-1.5 text-lg font-semibold">
-        {asset.name}{" "}
-        <span className="font-mono text-sm font-normal text-zinc-500 dark:text-zinc-400">
-          {asset.symbol}
-        </span>
-        <Link
-          href={
-            asset.kind === "crypto"
-              ? `/asset/${asset.symbol}?id=${encodeURIComponent(asset.id)}`
-              : `/asset/${asset.symbol}`
-          }
-          aria-label={`Open ${asset.symbol} full page`}
-          title="Open full page"
-          className="text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Link>
-      </h2>
-      <StatusBadge status={status} price={price} />
-    </div>
-  );
-}
-
-function StatusBadge({
-  status,
-  price,
-}: {
-  status: "connecting" | "open" | "closed";
-  price: number | null;
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="font-mono text-lg font-medium tabular-nums">
-        {price != null ? (
-          (() => {
-            const decimals = decimalsForPrice(price);
-            const scale = 10 ** decimals;
-            return (
-              <NumberTicker
-                value={Math.round(price * scale)}
-                duration={0.5}
-                stagger={0.02}
-                prefix="$"
-                format={(n) => formatNumber(n / scale, decimals)}
-              />
-            );
-          })()
-        ) : (
-          "—"
-        )}
-      </span>
-      <AnimatedBadge status={STATUS_TO_BADGE[status]} size="sm" contentKey={status}>
-        {STATUS_LABEL[status]}
-      </AnimatedBadge>
-    </div>
-  );
-}
-
-function StatsRow({ stats, windowLabel }: { stats: DayStats; windowLabel: string }) {
-  const hasAny = stats.changePercent != null || stats.high != null || stats.low != null;
-  if (!hasAny) return null;
-
   const positive = (stats.changePercent ?? 0) >= 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-      {stats.changePercent != null && (
-        <span
-          className={`font-mono font-semibold ${
-            positive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-          }`}
-        >
-          {positive ? "+" : ""}
-          {stats.changePercent.toFixed(2)}% ({windowLabel})
-        </span>
-      )}
-      {stats.high != null && (
-        <span className="font-mono text-zinc-600 dark:text-zinc-300">
-          High <span className="font-semibold">{formatCurrency(stats.high)}</span>
-        </span>
-      )}
-      {stats.low != null && (
-        <span className="font-mono text-zinc-600 dark:text-zinc-300">
-          Low <span className="font-semibold">{formatCurrency(stats.low)}</span>
-        </span>
-      )}
-      {stats.volume != null && (
-        <span className="font-mono text-zinc-600 dark:text-zinc-300">
-          Vol <span className="font-semibold">{formatVolume(stats.volume)}</span>
-        </span>
-      )}
+    <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-500 to-emerald-400 p-[1px] shadow-glow-accent">
+            <span className="flex h-full w-full items-center justify-center rounded-[11px] bg-bento-surface font-mono text-sm font-bold text-emerald-400">
+              {asset.symbol.charAt(0)}
+            </span>
+          </span>
+          <h2 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xl font-bold tracking-tight text-zinc-900 lg:text-2xl dark:text-white">
+            {asset.name}
+            <span className="font-mono text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">
+              {asset.symbol}
+            </span>
+            <Link
+              href={
+                asset.kind === "crypto"
+                  ? `/asset/${asset.symbol}?id=${encodeURIComponent(asset.id)}`
+                  : `/asset/${asset.symbol}`
+              }
+              aria-label={`Open ${asset.symbol} full page`}
+              title="Open full page"
+              className="text-zinc-400 transition hover:text-emerald-600 dark:text-zinc-500 dark:hover:text-emerald-400"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          </h2>
+          <StatusBadge status={status} />
+        </div>
+
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono">
+          <span className="text-3xl font-extrabold tracking-tight tabular-nums text-zinc-900 lg:text-4xl dark:text-white">
+            {price != null ? (
+              (() => {
+                const decimals = decimalsForPrice(price);
+                const scale = 10 ** decimals;
+                return (
+                  <NumberTicker
+                    value={Math.round(price * scale)}
+                    duration={0.5}
+                    stagger={0.02}
+                    prefix="$"
+                    format={(n) => formatNumber(n / scale, decimals)}
+                  />
+                );
+              })()
+            ) : (
+              "—"
+            )}
+          </span>
+          {stats.changePercent != null && (
+            <span
+              className={`text-sm font-semibold tabular-nums ${
+                positive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+              }`}
+            >
+              {positive ? "+" : ""}
+              {stats.changePercent.toFixed(2)}%{" "}
+              <span className="font-sans text-xs font-normal text-zinc-500 dark:text-zinc-400">
+                ({statsWindowLabel})
+              </span>
+            </span>
+          )}
+        </div>
+      </div>
+
+      <StatsRow stats={stats} statsWindowLabel={statsWindowLabel} />
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: "connecting" | "open" | "closed" }) {
+  return (
+    <AnimatedBadge
+      status={STATUS_TO_BADGE[status]}
+      size="sm"
+      contentKey={status}
+      className="font-mono uppercase tracking-wide"
+    >
+      {STATUS_LABEL[status]}
+    </AnimatedBadge>
+  );
+}
+
+function StatsRow({ stats, statsWindowLabel }: { stats: DayStats; statsWindowLabel: string }) {
+  const hasAny = stats.high != null || stats.low != null || stats.volume != null;
+  if (!hasAny) return null;
+
+  const prefix = statsWindowLabel === "24h" ? "24h" : "Today";
+  const segments: { label: string; value: string }[] = [];
+  if (stats.high != null) segments.push({ label: `${prefix} High`, value: formatCurrency(stats.high) });
+  if (stats.low != null) segments.push({ label: `${prefix} Low`, value: formatCurrency(stats.low) });
+  if (stats.volume != null) segments.push({ label: "Volume", value: formatVolume(stats.volume) });
+
+  return (
+    <div className="flex flex-wrap items-center rounded-2xl border border-black/5 bg-black/[0.03] p-2 dark:border-white/[0.05] dark:bg-white/[0.03]">
+      {segments.map((seg, i) => (
+        <div key={seg.label} className="flex items-center gap-x-3 sm:gap-x-4">
+          {i > 0 && (
+            <span
+              className="mx-1 h-5 w-px shrink-0 bg-black/10 sm:mx-0 dark:bg-white/[0.08]"
+              aria-hidden
+            />
+          )}
+          <span className="px-1">
+            <span className="block font-sans text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+              {seg.label}
+            </span>
+            <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">{seg.value}</span>
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -176,7 +201,13 @@ function exportCandlesToCsv(asset: AssetRef, range: ChartRange, candles: Candle[
   downloadTextFile(`${asset.symbol}_${range}.csv`, csv, "text/csv;charset=utf-8;");
 }
 
-export function AssetChartPanel({ asset }: { asset: AssetRef }) {
+export function AssetChartPanel({
+  asset,
+  showSignals = true,
+}: {
+  asset: AssetRef;
+  showSignals?: boolean;
+}) {
   const [chartHandle, setChartHandle] = useState<PriceChartHandle | null>(null);
   const { range, setRange } = useChartRange();
   const [chartType, setChartType] = useChartType();
@@ -214,7 +245,7 @@ export function AssetChartPanel({ asset }: { asset: AssetRef }) {
   const status = isCrypto ? cryptoStatus : stockStatus;
   const streamSeeding = isCrypto ? cryptoSeeding : stockSeeding;
   const dayStats = isCrypto ? cryptoDayStats : stockDayStats;
-  const windowLabel = isCrypto ? "24h" : "Today";
+  const statsWindowLabel = isCrypto ? "24h" : "Today";
 
   useEffect(() => {
     setLivePrice(price);
@@ -229,50 +260,64 @@ export function AssetChartPanel({ asset }: { asset: AssetRef }) {
   }, [chartHandle, asset, range]);
 
   return (
-    <div className="flex flex-col gap-3">
-      <AssetHeader asset={asset} status={status} price={price} />
-      <StatsRow stats={dayStats} windowLabel={windowLabel} />
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <ChartRangeSelector range={range} onChange={setRange} />
-          <SharedLayoutBg className="flex-row gap-0" pillClassName="bg-primary/[0.08] dark:bg-primary/[0.12]" inset={2}>
-            {CHART_TYPES.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setChartType(t)}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium ${
-                  chartType === t ? "bg-foreground text-background" : "text-zinc-500 dark:text-zinc-400"
-                }`}
-              >
-                {t === "area" ? "Area" : "Candle"}
-              </button>
-            ))}
-          </SharedLayoutBg>
-        </div>
-        <div className="flex items-center gap-1">
-          <PriceAlertPanel asset={asset} price={price} />
-          <button
-            type="button"
-            onClick={handleExportCsv}
-            disabled={!chartHandle}
-            aria-label={`Export ${asset.symbol} chart data as CSV`}
-            title="Export CSV"
-            className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-400 dark:hover:bg-white/10"
-          >
-            <Download className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </div>
-      <div className="relative">
-        {streamSeeding && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/60 backdrop-blur-sm dark:bg-zinc-950/60">
-            <Loader variant="dots" size={28} />
+    <div className="glass-tile relative flex flex-col gap-4 overflow-hidden rounded-3xl p-4 sm:p-5 lg:p-6">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl"
+      />
+      <div className="relative z-10 flex flex-col gap-4">
+        <AssetHeader asset={asset} status={status} price={price} stats={dayStats} statsWindowLabel={statsWindowLabel} />
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-xl border border-black/5 bg-black/[0.03] p-1 dark:border-white/[0.06] dark:bg-white/[0.04]">
+              <ChartRangeSelector range={range} onChange={setRange} />
+            </div>
+            <div className="inline-flex rounded-xl border border-black/5 bg-black/[0.03] p-1 dark:border-white/[0.06] dark:bg-white/[0.04]">
+              <SharedLayoutBg className="flex-row gap-0" pillClassName="bg-primary/[0.12] dark:bg-primary/[0.18]" inset={2}>
+                {CHART_TYPES.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setChartType(t)}
+                    className={`rounded-lg px-2.5 py-1 font-mono text-xs font-medium transition ${
+                      chartType === t
+                        ? "bg-white text-zinc-900 shadow-sm dark:bg-white/20 dark:text-white dark:shadow-none"
+                        : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                    }`}
+                  >
+                    {t === "area" ? "Area" : "Candle"}
+                  </button>
+                ))}
+              </SharedLayoutBg>
+            </div>
           </div>
-        )}
-        <PriceChart onReady={handleReady} timeVisible={range === "1D" || range === "1W"} chartType={chartType} />
+          <div className="flex items-center gap-1.5">
+            <PriceAlertPanel asset={asset} price={price} />
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              disabled={!chartHandle}
+              aria-label={`Export ${asset.symbol} chart data as CSV`}
+              title="Export CSV"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-black/5 bg-black/[0.03] text-zinc-500 transition hover:text-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/[0.06] dark:bg-white/[0.04] dark:text-zinc-400 dark:hover:text-zinc-200"
+            >
+              <Download className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="relative">
+          {streamSeeding && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-sm dark:bg-zinc-950/50">
+              <Loader variant="dots" size={28} />
+            </div>
+          )}
+          <PriceChart height={320} onReady={handleReady} timeVisible={range === "1D" || range === "1W"} chartType={chartType} />
+        </div>
+
+        {showSignals && <MarketSignals asset={asset} />}
       </div>
-      <MarketSignals asset={asset} />
     </div>
   );
 }

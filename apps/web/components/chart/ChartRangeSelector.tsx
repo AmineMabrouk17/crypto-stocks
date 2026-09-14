@@ -21,8 +21,10 @@ export function ChartRangeSelector({
           key={r}
           type="button"
           onClick={() => onChange(r)}
-          className={`rounded-md px-2.5 py-1 text-xs font-medium ${
-            range === r ? "bg-foreground text-background" : "text-zinc-500 dark:text-zinc-400"
+          className={`rounded-lg px-2.5 py-1 font-mono text-xs font-semibold transition ${
+            range === r
+              ? "bg-white text-zinc-900 shadow-sm dark:bg-white/20 dark:text-white dark:shadow-none"
+              : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
           }`}
         >
           {r}
@@ -31,3 +33,4 @@ export function ChartRangeSelector({
     </SharedLayoutBg>
   );
 }
+

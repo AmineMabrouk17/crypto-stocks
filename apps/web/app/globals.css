@@ -4,6 +4,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --shadow-glass: 0 8px 32px 0 rgb(0 0 0 / 0.37);
+  --shadow-glass-hover: 0 16px 36px -10px rgb(0 0 0 / 0.6);
+  --shadow-glow-emerald: 0 0 25px -4px rgb(16 185 129 / 0.25);
+  --shadow-glow-accent: 0 0 35px -5px rgb(99 102 241 / 0.25);
+  --color-bento-bg: #07090e;
+  --color-bento-surface: #0b0f19;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -117,14 +126,59 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+@layer components {
+  .glass-tile {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgb(255 255 255 / 0.78);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgb(0 0 0 / 0.08);
   }
-  body {
-    @apply bg-background text-foreground;
+  .glass-tile:hover {
+    border-color: rgb(0 0 0 / 0.16);
+    box-shadow: var(--shadow-glass-hover);
   }
-  html {
-    @apply font-sans;
+  .dark .glass-tile {
+    background: rgb(16 20 30 / 0.65);
+    border-color: rgb(255 255 255 / 0.07);
+    box-shadow: var(--shadow-glass);
   }
+  .dark .glass-tile:hover {
+    border-color: rgb(255 255 255 / 0.14);
+  }
+
+  .noise-bg {
+    background-color: oklch(0.985 0 0);
+    background-image:
+      radial-gradient(at 15% 10%, rgb(99 102 241 / 0.08) 0px, transparent 50%),
+      radial-gradient(at 85% 85%, rgb(16 185 129 / 0.06) 0px, transparent 55%);
+  }
+  .dark .noise-bg {
+    background-color: var(--color-bento-bg);
+    background-image:
+      radial-gradient(at 15% 10%, rgb(99 102 241 / 0.15) 0px, transparent 50%),
+      radial-gradient(at 85% 85%, rgb(16 185 129 / 0.1) 0px, transparent 55%),
+      radial-gradient(at 50% 50%, rgb(15 18 28 / 0.95) 0%, var(--color-bento-bg) 100%);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(0 0 0 / 0.14);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(0 0 0 / 0.28);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.12);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 0.25);
 }
