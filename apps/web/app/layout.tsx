@@ -31,7 +31,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${sans.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="noise-bg min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SelectedAssetProvider>
             <PriceAlertWatcher />
@@ -42,3 +42,4 @@ export default function RootLayout({
     </html>
   );
 }
+

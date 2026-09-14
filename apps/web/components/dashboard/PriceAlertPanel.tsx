@@ -65,18 +65,18 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
         aria-expanded={open}
         aria-label={open ? "Close price alerts" : "Set a price alert"}
         title="Price alerts"
-        className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+        className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-black/5 bg-black/[0.03] text-zinc-500 transition hover:text-zinc-800 dark:border-white/[0.06] dark:bg-white/[0.04] dark:text-zinc-400 dark:hover:text-zinc-200"
       >
         <Bell className="h-3.5 w-3.5" />
         {activeAlerts.length > 0 && (
-          <span className="rounded-full bg-primary/10 px-1.5 text-[10px] font-medium text-primary">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-black/5 bg-indigo-600 px-1 text-[9px] font-semibold leading-none text-white dark:border-white/10">
             {activeAlerts.length}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="mt-2 w-full max-w-xs rounded-lg border border-black/10 bg-white p-3 dark:border-white/15 dark:bg-zinc-900">
+        <div className="mt-2 w-full min-w-72 max-w-xs rounded-2xl border border-black/10 bg-white/95 p-3 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-bento-surface/95">
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <input
@@ -91,9 +91,9 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
                   price != null ? formatCurrency(price, decimalsForPrice(price)) : "Target price"
                 }
                 aria-label="Target price"
-                className="w-full min-w-0 rounded-md border border-black/10 bg-transparent px-2 py-1.5 text-sm outline-none focus:border-primary/50 dark:border-white/15"
+                className="w-full min-w-0 rounded-lg border border-black/10 bg-black/[0.03] px-2 py-1.5 font-mono text-sm outline-none transition focus:border-emerald-500/50 dark:border-white/15 dark:bg-white/[0.04] dark:focus:border-emerald-500/60"
               />
-              <div className="flex shrink-0 overflow-hidden rounded-md border border-black/10 dark:border-white/15">
+              <div className="flex shrink-0 overflow-hidden rounded-lg border border-black/10 dark:border-white/15">
                 <button
                   type="button"
                   onClick={() => setDirection("above")}
@@ -181,3 +181,4 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
     </div>
   );
 }
+

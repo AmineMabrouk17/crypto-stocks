@@ -32,12 +32,12 @@ export interface PriceChartHandle {
   getData: () => Candle[];
 }
 
-function buildChart(container: HTMLDivElement, timeVisible: boolean, chartType: ChartType) {
+function buildChart(container: HTMLDivElement, timeVisible: boolean, chartType: ChartType, height: number) {
   const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const chart = createChart(container, {
     width: container.clientWidth,
-    height: 380,
+    height,
     layout: {
       background: { type: ColorType.Solid, color: "transparent" },
       textColor: isDark ? "#d4d4d8" : "#3f3f46",
@@ -78,10 +78,12 @@ export function PriceChart({
   onReady,
   timeVisible = true,
   chartType = "candlestick",
+  height = 380,
 }: {
   onReady: (handle: PriceChartHandle) => void;
   timeVisible?: boolean;
   chartType?: ChartType;
+  height?: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -93,7 +95,7 @@ export function PriceChart({
     const container = containerRef.current;
     if (!container) return;
 
-    const { chart, series, resizeObserver } = buildChart(container, timeVisible, chartType);
+    const { chart, series, resizeObserver } = buildChart(container, timeVisible, chartType, height);
     chartRef.current = chart;
     seriesRef.current = series;
     roRef.current = resizeObserver;
@@ -148,3 +150,4 @@ export function PriceChart({
 
   return <div ref={containerRef} className="w-full" />;
 }
+
