@@ -1,6 +1,6 @@
 "use client";
 
-import { EyeOff, PanelRightOpen, ListOrdered } from "lucide-react";
+import { EyeOff, ListOrdered, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useChatCollapsed } from "@/lib/useChatCollapsed";
 import { useWatchlist } from "@/lib/useWatchlist";
@@ -24,13 +24,17 @@ export function DashboardGrid() {
   const assetKey = `${selected.kind}:${selected.symbol}`;
 
   return (
-    <div className="grid w-full flex-1 grid-cols-1 gap-6 p-4 sm:p-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:p-8">
-      <aside className="flex min-w-0 flex-col gap-6 lg:min-h-0">
+    <div className="flex w-full flex-1 flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:p-8">
+      <aside
+        className={`flex shrink-0 flex-col gap-6 lg:min-h-0 ${
+          watchlistVisible ? "lg:w-60" : "lg:w-12"
+        }`}
+      >
         <div className="glass-tile rounded-3xl p-3 md:hidden">
           <AssetSearchBar />
         </div>
         {watchlistVisible ? (
-          <div className="glass-tile flex min-h-0 max-h-80 flex-col rounded-3xl p-3 lg:max-h-none lg:flex-1">
+          <div className="glass-tile flex min-h-0 flex-col rounded-3xl p-3 lg:max-h-none lg:flex-1">
             <div className="flex items-center justify-between gap-2 px-1 pb-2">
               <span className="flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                 <ListOrdered className="h-3 w-3" />
@@ -59,46 +63,21 @@ export function DashboardGrid() {
           <button
             type="button"
             onClick={() => setWatchlistVisible(true)}
-            className="glass-tile flex items-center justify-center gap-2 rounded-3xl px-3 py-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-500 transition hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+            aria-label="Show watchlist sidebar"
+            title="Show watchlist"
+            className="glass-tile flex w-full items-center justify-center gap-2 rounded-3xl px-3 py-3 transition hover:text-zinc-800 dark:hover:text-zinc-200 lg:h-full lg:flex-1 lg:flex-col lg:gap-3 lg:px-1"
           >
-            <ListOrdered className="h-3.5 w-3.5" />
-            Watchlist
+            <ListOrdered className="h-4 w-4 shrink-0" />
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 lg:[writing-mode:vertical-rl] lg:rotate-180">
+              Watchlist
+            </span>
           </button>
         )}
       </aside>
 
-      <main className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-8">
+      <main className="grid min-w-0 flex-1 content-start grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-12">
           <AssetChartPanel asset={selected} showSignals={false} />
-        </div>
-
-        <div className="flex min-h-[480px] lg:col-span-4">
-          {collapsed ? (
-            <div className="glass-tile flex w-full flex-col items-center justify-center gap-3 rounded-3xl p-6 text-center">
-              <button
-                type="button"
-                onClick={toggle}
-                aria-label="Expand AI assistant panel"
-                title="Expand AI assistant"
-                className="inline-flex items-center gap-2 rounded-xl border border-indigo-500/25 bg-indigo-500/10 px-4 py-2.5 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-500/20 dark:text-indigo-300"
-              >
-                <PanelRightOpen className="h-4 w-4" />
-                Show AI assistant
-              </button>
-              <p className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
-                Ask about {selected.symbol} — price action, what it is, recent context.
-              </p>
-            </div>
-          ) : (
-            <ChatPanel
-              key={assetKey}
-              asset={selected}
-              livePrice={livePrice}
-              marketStats={marketStats}
-              description={description}
-              onCollapse={toggle}
-            />
-          )}
         </div>
 
         {selected.kind === "crypto" && (
@@ -120,6 +99,36 @@ export function DashboardGrid() {
           <NewsFeed key={`news-${assetKey}`} asset={selected} />
         </div>
       </main>
+
+      <aside
+        className={`flex shrink-0 flex-col gap-6 lg:min-h-0 ${
+          collapsed ? "lg:w-12" : "lg:w-80"
+        }`}
+      >
+        {collapsed ? (
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label="Show AI assistant"
+            title="Show AI assistant"
+            className="glass-tile flex w-full items-center justify-center gap-2 rounded-3xl px-3 py-3 transition hover:text-zinc-800 dark:hover:text-zinc-200 lg:h-full lg:flex-1 lg:flex-col lg:gap-3 lg:px-1"
+          >
+            <Sparkles className="h-4 w-4 shrink-0" />
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 lg:[writing-mode:vertical-rl] lg:rotate-180">
+              Assistant
+            </span>
+          </button>
+        ) : (
+          <ChatPanel
+            key={assetKey}
+            asset={selected}
+            livePrice={livePrice}
+            marketStats={marketStats}
+            description={description}
+            onCollapse={toggle}
+          />
+        )}
+      </aside>
     </div>
   );
 }
