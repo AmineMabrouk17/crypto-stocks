@@ -106,8 +106,10 @@ export function CrowdOdds({ symbol }: { symbol: string }) {
 }
 
 function SplitBar({ up, down }: { up: number; down: number }) {
-  const upPct = Math.round(up * 100);
-  const downPct = Math.round(down * 100);
+  const total = up + down;
+  const normalizedUp = total > 0 ? up / total : 0.5;
+  const upPct = Math.min(100, Math.max(0, Math.round(normalizedUp * 100)));
+  const downPct = 100 - upPct;
 
   return (
     <div className="flex flex-1 flex-col justify-center gap-2.5 py-1">
@@ -127,11 +129,11 @@ function SplitBar({ up, down }: { up: number; down: number }) {
         className="flex h-4 w-full gap-1 overflow-hidden rounded-full bg-black/[0.05] p-1 dark:bg-white/[0.05]"
       >
         <span
-          className="h-full rounded-l-full bg-gradient-to-r from-emerald-500 to-teal-400 shadow-glow-emerald"
+          className="h-full rounded-l-full bg-gradient-to-r from-emerald-500 to-teal-400 shadow-glow-emerald transition-[width] duration-300"
           style={{ width: `${upPct}%` }}
         />
         <span
-          className="h-full rounded-r-full bg-gradient-to-r from-rose-500 to-red-600"
+          className="h-full rounded-r-full bg-gradient-to-r from-rose-500 to-red-600 transition-[width] duration-300"
           style={{ width: `${downPct}%` }}
         />
       </div>
