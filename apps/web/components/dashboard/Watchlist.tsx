@@ -38,7 +38,11 @@ function displaySymbol(asset: AssetRef): string {
     : asset.symbol;
 }
 
-export function Watchlist() {
+interface WatchlistProps {
+  collapsed?: boolean;
+}
+
+export function Watchlist({ collapsed = false }: WatchlistProps) {
   const { watchlist, removeAsset } = useWatchlist();
   const { selected, setSelected } = useSelectedAsset();
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
@@ -48,6 +52,14 @@ export function Watchlist() {
   };
 
   if (watchlist.length === 0) {
+    if (collapsed) {
+      return (
+        <div className="flex flex-col items-center py-6 text-zinc-400">
+          <Search className="h-4 w-4" />
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-black/10 px-4 py-10 text-center dark:border-white/10">
         <Search className="h-4 w-4 text-zinc-400" />
@@ -60,13 +72,71 @@ export function Watchlist() {
   }
 
   return (
-    <div className="flex flex-col gap-1.5" role="list">
+    <div className={cn("flex flex-col gap-1.5", collapsed && "items-center gap-2")} role="list">
       {watchlist.map((asset) => {
         const active = isSameAsset(asset, selected);
         const colors = asset.kind === "crypto" ? CRYPTO_COLORS : STOCK_COLORS;
         const initial = initials(asset.symbol);
         const imageKey = `${asset.kind}:${asset.symbol}`;
         const showImage = !failedImages.has(imageKey);
+        const ticker = displaySymbol(asset);
+
+        if (collapsed) {
+          return (
+            <div key={imageKey} role="listitem" className="group relative flex items-center justify-center">
+              <button
+                type="button"
+                onClick={() => setSelected(asset)}
+                title={`${ticker} — ${asset.name} (${asset.kind.toUpperCase()})`}
+                aria-label={`${asset.symbol}, ${asset.name}`}
+                className={cn(
+                  "relative flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-150",
+                  "hover:scale-105 hover:shadow-sm focus:outline-none",
+                  colors.hoverBg,
+                  active
+                    ? [colors.activeBg, "border-amber-500/40 dark:border-amber-500/50 shadow-sm"]
+                    : "border-transparent"
+                )}
+              >
+                {active && (
+                  <div
+                    className={cn(
+                      "absolute -left-1.5 top-2.5 bottom-2.5 w-1 rounded-full",
+                      colors.accent
+                    )}
+                  />
+                )}
+
+                {showImage ? (
+                  <img
+                    src={logoUrl(asset)}
+                    alt={asset.name}
+                    onError={() => handleImageError(imageKey)}
+                    className="h-7 w-7 flex-shrink-0 rounded-full bg-white/10 object-contain"
+                  />
+                ) : (
+                  <div
+                    className={cn(
+                      "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[11px] font-bold text-white shadow-sm",
+                      colors.gradient
+                    )}
+                  >
+                    {initial}
+                  </div>
+                )}
+
+                {/* Floating tooltip on hover */}
+                <div className="pointer-events-none absolute left-full ml-3 z-50 hidden group-hover:flex items-center gap-2 rounded-xl border border-black/10 bg-zinc-900/95 px-2.5 py-1.5 text-xs text-white shadow-xl backdrop-blur-md dark:border-white/15 dark:bg-zinc-800/95 whitespace-nowrap">
+                  <span className="font-mono font-semibold">{ticker}</span>
+                  <span className="text-zinc-400 text-[11px] max-w-[140px] truncate">{asset.name}</span>
+                  <span className={cn("rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase", colors.badge)}>
+                    {asset.kind}
+                  </span>
+                </div>
+              </button>
+            </div>
+          );
+        }
 
         return (
           <div
@@ -76,14 +146,14 @@ export function Watchlist() {
               "group relative flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition-all duration-150",
               "hover:-translate-y-0.5 hover:shadow-sm",
               colors.hoverBg,
-              active ? [colors.activeBg, "shadow-sm"] : "border-transparent",
+              active ? [colors.activeBg, "shadow-sm"] : "border-transparent"
             )}
           >
             {active && (
               <div
                 className={cn(
                   "absolute left-0 top-2.5 h-5 w-0.5 rounded-full",
-                  colors.accent,
+                  colors.accent
                 )}
               />
             )}
@@ -99,7 +169,7 @@ export function Watchlist() {
               <div
                 className={cn(
                   "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white shadow-sm",
-                  colors.gradient,
+                  colors.gradient
                 )}
               >
                 {initial}
@@ -113,12 +183,12 @@ export function Watchlist() {
             >
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-                  {displaySymbol(asset)}
+                  {ticker}
                 </span>
                 <span
                   className={cn(
                     "rounded-full px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider",
-                    colors.badge,
+                    colors.badge
                   )}
                 >
                   {asset.kind}
@@ -136,7 +206,7 @@ export function Watchlist() {
               className={cn(
                 "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-xs transition-all duration-150",
                 "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
-                "text-zinc-400 hover:bg-destructive/10 hover:text-destructive dark:text-zinc-500",
+                "text-zinc-400 hover:bg-destructive/10 hover:text-destructive dark:text-zinc-500"
               )}
             >
               <X className="h-3.5 w-3.5" />
