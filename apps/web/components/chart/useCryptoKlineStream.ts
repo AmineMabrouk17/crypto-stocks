@@ -30,6 +30,15 @@ export function useCryptoKlineStream(
   const highRef = useRef<number | null>(null);
   const lowRef = useRef<number | null>(null);
 
+  // Keep a stable ref to the chart handle so handle reference updates never tear down the WS connection
+  const chartRef = useRef(chart);
+  const isChartReady = Boolean(chart);
+
+  // Update ref in an effect (not render) so handle changes never restart the stream
+  useEffect(() => {
+    chartRef.current = chart;
+  }, [chart]);
+
   function recomputeStats(closePrice: number) {
     const sessionOpen = sessionOpenRef.current;
     setStats({
@@ -41,7 +50,7 @@ export function useCryptoKlineStream(
   }
 
   useEffect(() => {
-    if (!chart) return;
+    if (!symbol || !isChartReady) return;
     closedByEffectRef.current = false;
     backoffRef.current = 1000;
     const { interval, limit } = binanceRangeConfig(range);
@@ -53,7 +62,7 @@ export function useCryptoKlineStream(
       try {
         const candles = await fetchKlines(symbol, interval, limit);
         if (cancelled) return;
-        chart!.setData(candles);
+        chartRef.current?.setData(candles);
         const first = candles[0];
         const last = candles[candles.length - 1];
         if (first) sessionOpenRef.current = first.open;
@@ -92,7 +101,7 @@ export function useCryptoKlineStream(
           low: Number(k.l),
           close: Number(k.c),
         };
-        chart!.update(candle);
+        chartRef.current?.update(candle);
         highRef.current = highRef.current != null ? Math.max(highRef.current, candle.high) : candle.high;
         lowRef.current = lowRef.current != null ? Math.min(lowRef.current, candle.low) : candle.low;
         setPrice(candle.close);
@@ -121,7 +130,7 @@ export function useCryptoKlineStream(
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [symbol, range, chart]);
+  }, [symbol, range, isChartReady]);
 
   return { price, stats, status, seeding };
 }
