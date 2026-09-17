@@ -51,66 +51,73 @@ export function NewsFeed({ asset }: { asset: AssetRef }) {
   const articles = data?.articles ?? [];
 
   return (
-    <div className="glass-tile rounded-3xl p-4 text-sm sm:p-5 lg:p-6">
+    <div className="glass-tile flex flex-col rounded-3xl p-4 text-sm sm:p-5 lg:p-6">
       <div className="flex items-center justify-between border-b border-black/5 pb-3 dark:border-white/[0.06]">
         <div className="flex items-center gap-2">
           <Newspaper className="h-4 w-4 text-indigo-500" />
           <h3 className="font-bold tracking-tight text-zinc-900 dark:text-white">News for {asset.name}</h3>
         </div>
+        {articles.length > 0 && (
+          <span className="rounded-full border border-black/10 px-2 py-0.5 font-mono text-[10px] tabular-nums text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+            {articles.length} stories
+          </span>
+        )}
       </div>
 
       {isLoading && (
-        <div className="flex items-center gap-2 py-4 text-zinc-500 dark:text-zinc-400">
+        <div className="flex items-center gap-2 py-6 text-zinc-500 dark:text-zinc-400">
           <Loader variant="dots" size={16} />
           Loading news…
         </div>
       )}
 
       {!isLoading && (error || !data) && (
-        <p className="py-4 text-zinc-500 dark:text-zinc-400">News unavailable right now.</p>
+        <p className="py-6 text-zinc-500 dark:text-zinc-400">News unavailable right now.</p>
       )}
 
       {!isLoading && !error && data && articles.length === 0 && (
-        <p className="py-4 text-zinc-500 dark:text-zinc-400">No recent articles found.</p>
+        <p className="py-6 text-zinc-500 dark:text-zinc-400">No recent articles found.</p>
       )}
 
       {!isLoading && !error && articles.length > 0 && (
-        <ul className="divide-y divide-black/5 dark:divide-white/[0.06]">
-          {articles.slice(0, 10).map((article) => {
-            const sentiment = article.sentiment ?? "neutral";
-            const relativeTime = formatRelativeTime(article.publishedAt);
-            return (
-              <li
-                key={article.link}
-                className="-mx-2 rounded-xl px-2 py-3.5 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
-              >
-                <div className="mb-1 flex flex-col justify-between gap-1.5 sm:flex-row sm:items-baseline">
-                  <a
-                    href={article.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold leading-snug text-zinc-800 transition-colors hover:text-emerald-600 dark:text-zinc-100 dark:hover:text-emerald-400"
-                  >
-                    {article.title}
-                  </a>
-                  <AnimatedBadge
-                    status={SENTIMENT_STATUS[sentiment]}
-                    size="sm"
-                    showIcon={false}
-                    className="self-start font-mono uppercase tracking-wide sm:self-auto"
-                  >
-                    {SENTIMENT_LABEL[sentiment]}
-                  </AnimatedBadge>
-                </div>
-                <div className="flex items-center gap-2 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
-                  {article.source && <span className="font-medium text-zinc-600 dark:text-zinc-300">{article.source}</span>}
-                  {article.source && relativeTime && <span aria-hidden>·</span>}
-                  {relativeTime && <span>{relativeTime}</span>}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="max-h-[420px] overflow-y-auto pr-1">
+          <ul className="divide-y divide-black/5 dark:divide-white/[0.06]">
+            {articles.slice(0, 15).map((article) => {
+              const sentiment = article.sentiment ?? "neutral";
+              const relativeTime = formatRelativeTime(article.publishedAt);
+              return (
+                <li
+                  key={article.link}
+                  className="-mx-2 rounded-xl px-2 py-3 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                >
+                  <div className="mb-1 flex flex-col justify-between gap-1.5 sm:flex-row sm:items-baseline">
+                    <a
+                      href={article.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold leading-snug text-zinc-800 transition-colors hover:text-emerald-600 dark:text-zinc-100 dark:hover:text-emerald-400"
+                    >
+                      {article.title}
+                    </a>
+                    <AnimatedBadge
+                      status={SENTIMENT_STATUS[sentiment]}
+                      size="sm"
+                      showIcon={false}
+                      className="self-start font-mono uppercase tracking-wide sm:self-auto"
+                    >
+                      {SENTIMENT_LABEL[sentiment]}
+                    </AnimatedBadge>
+                  </div>
+                  <div className="flex items-center gap-2 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+                    {article.source && <span className="font-medium text-zinc-600 dark:text-zinc-300">{article.source}</span>}
+                    {article.source && relativeTime && <span aria-hidden>·</span>}
+                    {relativeTime && <span>{relativeTime}</span>}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </div>
   );

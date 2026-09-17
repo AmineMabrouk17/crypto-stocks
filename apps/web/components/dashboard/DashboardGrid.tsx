@@ -91,7 +91,7 @@ export function DashboardGrid() {
           </>
         )}
 
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-4 lg:self-start">
           <AssetDescriptionPanel key={`desc-${assetKey}`} asset={selected} onLoaded={setDescription} />
         </div>
 
