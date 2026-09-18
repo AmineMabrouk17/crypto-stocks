@@ -287,21 +287,21 @@ export function ChatPanel({
             e.preventDefault();
             sendMessage();
           }}
-          className="flex items-center gap-2 border-t border-black/5 p-3 sm:px-5 dark:border-white/[0.06]"
+          className="flex items-center gap-2 border-t border-black/5 p-3 dark:border-white/[0.06]"
         >
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={`Message about ${displaySymbol(asset)}…`}
-            className="min-w-0 flex-1 rounded-xl border border-black/10 bg-black/[0.03] px-3 py-2.5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/40 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-zinc-100 dark:focus:border-indigo-500/60 dark:focus:ring-indigo-500/50"
+            placeholder={`Ask about ${displaySymbol(asset)}…`}
+            className="min-w-0 flex-1 rounded-xl border border-black/10 bg-black/[0.03] px-3 py-2 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/40 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-zinc-100 dark:focus:border-indigo-500/60 dark:focus:ring-indigo-500/50"
           />
           <StatefulButton
             type="submit"
-            size="md"
+            size="sm"
             state={(sending ? "loading" : "idle") satisfies ButtonState}
             loadingText="Sending"
             disabled={!input.trim()}
-            className="shrink-0 bg-indigo-600 text-white hover:bg-indigo-500"
+            className="shrink-0 bg-indigo-600 px-3.5 text-white hover:bg-indigo-500"
           >
             Send
           </StatefulButton>
