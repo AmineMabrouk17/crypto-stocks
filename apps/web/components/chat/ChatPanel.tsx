@@ -134,7 +134,7 @@ export function ChatPanel({
   }
 
   return (
-    <div className="glass-tile relative flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-3xl">
+    <div className="glass-tile relative flex h-[520px] lg:h-full min-h-0 flex-1 flex-col overflow-hidden rounded-3xl">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl"

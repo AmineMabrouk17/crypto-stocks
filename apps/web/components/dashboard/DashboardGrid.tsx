@@ -28,7 +28,7 @@ export function DashboardGrid() {
     <div className="flex w-full flex-1 flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:p-8">
       <aside
         className={cn(
-          "flex shrink-0 flex-col gap-6 lg:min-h-0 lg:self-stretch transition-[width] duration-300 ease-in-out",
+          "flex shrink-0 flex-col gap-6 lg:min-h-0 lg:sticky lg:top-24 lg:self-start lg:h-[calc(100vh-7.5rem)] transition-[width] duration-300 ease-in-out",
           watchlistVisible ? "lg:w-60" : "lg:w-16"
         )}
       >
@@ -111,9 +111,10 @@ export function DashboardGrid() {
       </main>
 
       <aside
-        className={`flex shrink-0 flex-col gap-6 lg:min-h-0 ${
+        className={cn(
+          "flex shrink-0 flex-col gap-6 lg:min-h-0 lg:sticky lg:top-24 lg:self-start lg:h-[calc(100vh-7.5rem)] transition-[width] duration-300 ease-in-out",
           collapsed ? "lg:w-12" : "lg:w-80"
-        }`}
+        )}
       >
         {collapsed ? (
           <button
