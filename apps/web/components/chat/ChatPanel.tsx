@@ -2,7 +2,7 @@
 
 import type { AssetRef, ChatMessage, MarketStats } from "@crypto-stocks/lib";
 import { FREE_MODELS } from "@crypto-stocks/lib";
-import { AlertCircle, PanelRightClose, Sparkles, X } from "lucide-react";
+import { AlertCircle, PanelRightClose, RotateCcw, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useFreeModel } from "@/lib/useFreeModel";
 import { useLlmSettings } from "@/lib/useLlmSettings";
@@ -25,6 +25,33 @@ function displaySymbol(asset: AssetRef): string {
     : asset.symbol;
 }
 
+const CHAT_STORAGE_PREFIX = "crypto-stocks:chat-history:";
+
+function loadMessages(symbol: string): ChatMessage[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.sessionStorage.getItem(`${CHAT_STORAGE_PREFIX}${symbol}`);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveMessages(symbol: string, messages: ChatMessage[]) {
+  if (typeof window === "undefined") return;
+  try {
+    if (messages.length === 0) {
+      window.sessionStorage.removeItem(`${CHAT_STORAGE_PREFIX}${symbol}`);
+    } else {
+      window.sessionStorage.setItem(`${CHAT_STORAGE_PREFIX}${symbol}`, JSON.stringify(messages));
+    }
+  } catch {
+    // sessionStorage quota or private browsing fallback
+  }
+}
+
 export function ChatPanel({
   asset,
   livePrice,
@@ -38,10 +65,11 @@ export function ChatPanel({
   description: string | null;
   onCollapse?: () => void;
 }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadMessages(asset.symbol));
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { settings: llmSettings } = useLlmSettings();
   const { selected: freeModel, select: selectFreeModel } = useFreeModel();
@@ -50,9 +78,20 @@ export function ChatPanel({
     ? `${PROVIDER_BADGE_LABELS[llmSettings.provider] ?? llmSettings.provider} · ${llmSettings.model}`
     : freeModel.label;
 
+  // Persist messages whenever they change
+  useEffect(() => {
+    saveMessages(asset.symbol, messages);
+  }, [asset.symbol, messages]);
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [messages]);
+
+  function handleClearChat() {
+    setMessages([]);
+    saveMessages(asset.symbol, []);
+    setShowClearConfirm(false);
+  }
 
   async function sendMessage() {
     const text = input.trim();
@@ -134,6 +173,17 @@ export function ChatPanel({
                 {badgeLabel}
               </AnimatedBadge>
             )}
+            {messages.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(true)}
+                aria-label="Reset chat history"
+                title="Clear conversation"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-black/5 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-white/10 dark:hover:text-zinc-200"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </button>
+            )}
             {onCollapse && (
               <button
                 type="button"
@@ -148,7 +198,30 @@ export function ChatPanel({
           </div>
         </div>
 
-        {/* Message Thread */}
+        {/* Clear Confirmation Bar */}
+        {showClearConfirm && (
+          <div className="flex items-center justify-between border-b border-black/5 bg-zinc-100/80 px-4 py-2 text-xs backdrop-blur-sm dark:border-white/10 dark:bg-zinc-800/80">
+            <span className="text-zinc-600 dark:text-zinc-300">Clear chat history for {displaySymbol(asset)}?</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleClearChat}
+                className="font-medium text-rose-600 hover:underline dark:text-rose-400"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(false)}
+                className="text-zinc-500 hover:underline dark:text-zinc-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Messages */}
         <div
           ref={scrollRef}
           className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-4 text-sm sm:px-5"
