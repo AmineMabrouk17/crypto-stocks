@@ -19,6 +19,12 @@ const PROVIDER_BADGE_LABELS: Record<string, string> = {
   custom: "Custom",
 };
 
+function displaySymbol(asset: AssetRef): string {
+  return asset.kind === "crypto" && asset.symbol.endsWith("USDT")
+    ? asset.symbol.slice(0, -4)
+    : asset.symbol;
+}
+
 export function ChatPanel({
   asset,
   livePrice,
@@ -91,12 +97,12 @@ export function ChatPanel({
       />
       <div className="relative flex min-h-0 flex-1 flex-col">
         <div className="flex items-center justify-between gap-2 border-b border-black/5 px-4 py-3 sm:px-5 dark:border-white/[0.06]">
-          <div className="flex items-center gap-2.5">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300">
               <Sparkles className="h-3.5 w-3.5" />
             </span>
             <h2 className="truncate text-sm font-bold tracking-tight text-zinc-900 dark:text-white">
-              Ask about {asset.symbol}
+              Ask {displaySymbol(asset)}
             </h2>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -108,10 +114,10 @@ export function ChatPanel({
                   if (model) selectFreeModel(model);
                 }}
                 aria-label="Select AI model"
-                className="w-28 rounded-lg border border-black/10 bg-white/60 px-1.5 py-1 font-mono text-[11px] outline-none transition focus:border-indigo-500/50 dark:border-white/10 dark:bg-zinc-900/90 dark:focus:border-indigo-500/60"
+                className="w-36 rounded-lg border border-black/10 bg-white/60 px-2 py-1 font-sans text-xs font-medium text-zinc-800 outline-none transition focus:border-indigo-500/50 dark:border-white/10 dark:bg-zinc-900/90 dark:text-zinc-200 dark:focus:border-indigo-500/60"
               >
                 {FREE_MODELS.map((m) => (
-                  <option key={m.id} value={m.id}>
+                  <option key={m.id} value={m.id} className="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
                     {m.label}
                   </option>
                 ))}
@@ -187,7 +193,7 @@ export function ChatPanel({
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={`Message about ${asset.symbol}…`}
+            placeholder={`Message about ${displaySymbol(asset)}…`}
             className="min-w-0 flex-1 rounded-xl border border-black/10 bg-black/[0.03] px-3 py-2.5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/40 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-zinc-100 dark:focus:border-indigo-500/60 dark:focus:ring-indigo-500/50"
           />
           <StatefulButton
