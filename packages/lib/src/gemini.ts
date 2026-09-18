@@ -1,4 +1,4 @@
-import { GEMINI_API_BASE } from "./constants";
+import { GEMINI_API_BASE, GEMINI_MODEL } from "./constants";
 import type { ChatMessage } from "./types";
 
 export async function generateChatReply(
@@ -7,7 +7,7 @@ export async function generateChatReply(
   messages: ChatMessage[],
   model?: string,
 ): Promise<string> {
-  const modelId = model ?? "gemini-flash-latest";
+  const modelId = model ?? GEMINI_MODEL;
   const url = `${GEMINI_API_BASE}/models/${modelId}:generateContent`;
 
   const contents = messages.map((m) => ({
@@ -28,8 +28,16 @@ export async function generateChatReply(
   });
 
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gemini request failed: ${res.status} ${errText}`);
+    let message = `Gemini returned status ${res.status}`;
+    try {
+      const errJson = await res.json();
+      if (errJson?.error?.message) {
+        message = errJson.error.message;
+      }
+    } catch {
+      // fallback to status code
+    }
+    throw new Error(message);
   }
 
   const data = await res.json();

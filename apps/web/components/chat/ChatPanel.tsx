@@ -2,7 +2,7 @@
 
 import type { AssetRef, ChatMessage, MarketStats } from "@crypto-stocks/lib";
 import { FREE_MODELS } from "@crypto-stocks/lib";
-import { PanelRightClose, Sparkles } from "lucide-react";
+import { AlertCircle, PanelRightClose, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useFreeModel } from "@/lib/useFreeModel";
 import { useLlmSettings } from "@/lib/useLlmSettings";
@@ -41,6 +41,7 @@ export function ChatPanel({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { settings: llmSettings } = useLlmSettings();
   const { selected: freeModel, select: selectFreeModel } = useFreeModel();
@@ -57,6 +58,7 @@ export function ChatPanel({
     const text = input.trim();
     if (!text || sending) return;
 
+    setChatError(null);
     const nextMessages: ChatMessage[] = [...messages, { role: "user", content: text }];
     setMessages(nextMessages);
     setInput("");
@@ -76,14 +78,17 @@ export function ChatPanel({
           freeModelId: llmSettings ? undefined : freeModel.id,
         }),
       });
+
       const data = await res.json();
-      const reply: string = res.ok ? data.reply : `Error: ${data.error ?? "chat failed"}`;
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+
+      if (!res.ok) {
+        setChatError(data.error ?? "Failed to connect to the AI model. Please try another model or retry.");
+        return;
+      }
+
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Sorry, something went wrong reaching the assistant." },
-      ]);
+      setChatError("Network error. Please check your connection and try again.");
     } finally {
       setSending(false);
     }
@@ -96,6 +101,7 @@ export function ChatPanel({
         className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl"
       />
       <div className="relative flex min-h-0 flex-1 flex-col">
+        {/* Header */}
         <div className="flex items-center justify-between gap-2 border-b border-black/5 px-4 py-3 sm:px-5 dark:border-white/[0.06]">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300">
@@ -105,7 +111,7 @@ export function ChatPanel({
               Ask {displaySymbol(asset)}
             </h2>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5">
             {!llmSettings && (
               <select
                 value={freeModel.id}
@@ -142,6 +148,7 @@ export function ChatPanel({
           </div>
         </div>
 
+        {/* Message Thread */}
         <div
           ref={scrollRef}
           className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-4 text-sm sm:px-5"
@@ -183,6 +190,25 @@ export function ChatPanel({
           )}
         </div>
 
+        {/* Error Alert Banner */}
+        {chatError && (
+          <div className="mx-4 mb-2 flex items-center justify-between gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-3 text-xs text-rose-700 sm:mx-5 dark:border-rose-500/30 dark:bg-rose-950/30 dark:text-rose-300">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" />
+              <span>{chatError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setChatError(null)}
+              aria-label="Dismiss error"
+              className="rounded-lg p-1 text-rose-500 transition hover:bg-rose-500/20"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* Input Footer */}
         <form
           onSubmit={(e) => {
             e.preventDefault();

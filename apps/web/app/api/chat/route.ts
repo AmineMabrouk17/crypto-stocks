@@ -22,10 +22,7 @@ interface ChatRequestBody {
   livePrice: number | null;
   marketStats: MarketStats | null;
   description: string | null;
-  /** Optional BYOK settings from the client. When present, the request is routed to the
-   * user's chosen provider using their own key instead of the server's default Gemini key. */
   llmSettings?: LlmSettings | null;
-  /** ID of a free built-in model (from FREE_MODELS) to use. Ignored when llmSettings is set. */
   freeModelId?: string | null;
 }
 
@@ -81,7 +78,6 @@ export async function POST(request: Request) {
     let reply: string;
 
     if (llmSettings?.apiKey) {
-      // BYOK path: the user supplied their own provider + key from the settings panel.
       switch (llmSettings.provider) {
         case "openai":
           reply = await generateChatReplyOpenAI(
@@ -126,18 +122,12 @@ export async function POST(request: Request) {
           break;
         case "gemini":
         default:
-          reply = await generateChatReply(llmSettings.apiKey, systemInstruction, messages);
+          reply = await generateChatReply(llmSettings.apiKey, systemInstruction, messages, llmSettings.model);
           break;
       }
     } else if (freeModelId) {
-      // Free built-in model path: route to the provider using server-side env vars.
-      const model = FREE_MODELS.find((m) => m.id === freeModelId);
-      if (!model) {
-        return NextResponse.json(
-          { error: `Unknown free model: ${freeModelId}` },
-          { status: 400 },
-        );
-      }
+      // Fallback gracefully to the first supported model if client had a stale or invalid model stored
+      const model = FREE_MODELS.find((m) => m.id === freeModelId) ?? FREE_MODELS[0];
 
       switch (model.provider) {
         case "groq": {
@@ -165,7 +155,6 @@ export async function POST(request: Request) {
         }
       }
     } else {
-      // Default path: no BYOK and no freeModelId — use the app's server-side Gemini key.
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
         return NextResponse.json(
@@ -178,8 +167,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ reply });
   } catch (error) {
+    console.error("[/api/chat] Error:", error instanceof Error ? error.message : error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Chat request failed" },
+      { error: "Failed to connect to the AI model. Please try another model or try again later." },
       { status: 502 },
     );
   }
