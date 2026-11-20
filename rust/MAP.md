@@ -13,9 +13,9 @@ See [DECISIONS.md](DECISIONS.md). Domain vocabulary is in [GLOSSARY.md](GLOSSARY
 | Unit | Crate | Wave | State |
 | --- | --- | ---: | --- |
 | foundation / front door | `app`, `common` | 0 | done |
-| fear and greed | `feargreed` | 1 | open |
-| coin gecko | `coingecko` | 1 | open |
-| news | `news` | 1 | open |
+| fear and greed | `feargreed` | 1 | done |
+| coin gecko | `coingecko` | 1 | done |
+| news | `news` | 1 | done |
 | polymarket crowd odds | `polymarket` | 2 | open |
 | yahoo finance | `yahoo` | 2 | open |
 | LLM chat | `llm` | 2 | open |

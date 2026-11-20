@@ -5,6 +5,10 @@ edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
+[lib]
+name = "crypto_stocks_backend"
+path = "src/lib.rs"
+
 [[bin]]
 name = "crypto-stocks-backend"
 path = "src/main.rs"
@@ -14,7 +18,14 @@ axum.workspace = true
 tokio.workspace = true
 tower-http.workspace = true
 tracing.workspace = true
+serde.workspace = true
 serde_json.workspace = true
 anyhow.workspace = true
 crypto-stocks-common.workspace = true
+crypto-stocks-feargreed.workspace = true
+crypto-stocks-coingecko.workspace = true
+crypto-stocks-news.workspace = true
 
+[dev-dependencies]
+tower.workspace = true
+wiremock.workspace = true

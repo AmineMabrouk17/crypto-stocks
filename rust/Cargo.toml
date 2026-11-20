@@ -36,4 +36,10 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 thiserror = "2"
 anyhow = "1"
+regex = "1"
+tower = { version = "0.5", features = ["util"] }
+wiremock = "0.6"
 crypto-stocks-common = { path = "crates/common" }
+crypto-stocks-feargreed = { path = "crates/feargreed" }
+crypto-stocks-coingecko = { path = "crates/coingecko" }
+crypto-stocks-news = { path = "crates/news" }

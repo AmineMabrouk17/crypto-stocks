@@ -157,6 +157,34 @@ impl Http {
             .map_err(|e| Error::Parse(format!("invalid JSON: {e}")))
     }
 
+    /// Equivalent to the TS pattern `if (!res.ok) throw new Error(\`<prefix> request failed: ${res.status}\`)`.
+    pub async fn text_checked(&self, req: &HttpRequest, prefix: &str) -> Result<String> {
+        let response = self.send(req).await?;
+        if !response.status().is_success() {
+            return Err(Error::upstream(prefix, response.status().as_u16()));
+        }
+        response
+            .text()
+            .await
+            .map_err(|e| Error::Transport(e.to_string()))
+    }
+
+    /// Checked variant of [`Self::json`] that maps non-2xx to the TS error text.
+    pub async fn json_checked<T: DeserializeOwned>(
+        &self,
+        req: &HttpRequest,
+        prefix: &str,
+    ) -> Result<T> {
+        let response = self.send(req).await?;
+        if !response.status().is_success() {
+            return Err(Error::upstream(prefix, response.status().as_u16()));
+        }
+        response
+            .json::<T>()
+            .await
+            .map_err(|e| Error::Parse(format!("invalid JSON: {e}")))
+    }
+
     pub fn client(&self) -> &reqwest::Client {
         &self.client
     }

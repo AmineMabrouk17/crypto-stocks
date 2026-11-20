@@ -6,3 +6,9 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+crypto-stocks-common.workspace = true
+moka.workspace = true
+regex.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

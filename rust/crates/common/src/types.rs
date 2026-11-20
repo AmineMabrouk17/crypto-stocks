@@ -34,23 +34,13 @@ pub struct DayStats {
     pub volume: Option<f64>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AssetDescriptionExtra {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub market_cap_rank: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub price_usd: Option<f64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub market_cap_usd: Option<f64>,
-}
-
+/// Matches the TS `extra?: Record<string, string | number | undefined>`:
+/// always serialised as an object, with `undefined` values omitted.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AssetDescription {
     pub name: String,
     pub summary: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub extra: Option<AssetDescriptionExtra>,
+    pub extra: serde_json::Map<String, Value>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -90,12 +80,11 @@ pub enum Sentiment {
 pub struct NewsArticle {
     pub title: String,
     pub link: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Required in the TS contract; `null` when Google News omits it.
     pub source: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Required in the TS contract; `null` when Google News omits it.
     pub published_at: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub sentiment: Option<Sentiment>,
+    pub sentiment: Sentiment,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

@@ -1,6 +1,5 @@
-mod router;
-
 use anyhow::Result;
+use crypto_stocks_backend::{router, state::AppState};
 use crypto_stocks_common::{config::Config, init_tracing};
 use tokio::{net::TcpListener, signal};
 
@@ -9,10 +8,11 @@ async fn main() -> Result<()> {
     let config = Config::from_env().map_err(anyhow::Error::msg)?;
     init_tracing();
 
-    let listener = TcpListener::bind(config.bind_addr).await?;
-    tracing::info!(addr = %config.bind_addr, "backend listening");
+    let state = AppState::new(config).map_err(anyhow::Error::msg)?;
+    let listener = TcpListener::bind(state.config.bind_addr).await?;
+    tracing::info!(addr = %state.config.bind_addr, "backend listening");
 
-    axum::serve(listener, router::build(config))
+    axum::serve(listener, router::build(state))
         .with_graceful_shutdown(shutdown_signal())
         .await?;
     Ok(())
