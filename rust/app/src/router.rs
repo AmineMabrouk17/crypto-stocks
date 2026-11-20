@@ -5,7 +5,7 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use crypto_stocks_common::{config::Config, json::js_json};
+use crypto_stocks_common::{config::Config, json::js_json, types::CrowdOddsHorizon};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use tower_http::{
@@ -19,7 +19,7 @@ pub fn build(state: AppState) -> Router {
     let cors = cors_layer(&state.config);
     let routes = Router::new()
         .route("/health", get(health))
-        .route("/api/signals/crowd-odds", get(not_implemented))
+        .route("/api/signals/crowd-odds", get(crowd_odds))
         .route("/api/signals/sentiment", get(sentiment))
         .route("/api/stocks/profile", get(not_implemented))
         .route("/api/stocks/quote", get(not_implemented))
@@ -71,6 +71,44 @@ fn cached_json<T: Serialize>(cache_control: &'static str, body: &T) -> Response 
     let mut headers = HeaderMap::new();
     headers.insert(CACHE_CONTROL, HeaderValue::from_static(cache_control));
     (StatusCode::OK, headers, Json(js_json(body))).into_response()
+}
+
+#[derive(Debug, Deserialize)]
+struct CrowdOddsQuery {
+    symbol: Option<String>,
+    horizon: Option<String>,
+}
+
+async fn crowd_odds(
+    State(state): State<AppState>,
+    Query(query): Query<CrowdOddsQuery>,
+) -> Response {
+    let symbol = query.symbol.as_deref().unwrap_or("").trim().to_uppercase();
+    if symbol.is_empty() {
+        return error_response(
+            StatusCode::BAD_REQUEST,
+            json!({ "error": "Missing symbol" }),
+        );
+    }
+    let Some(horizon) = query.horizon.as_deref().and_then(CrowdOddsHorizon::parse) else {
+        return error_response(
+            StatusCode::BAD_REQUEST,
+            json!({ "error": "Invalid horizon" }),
+        );
+    };
+
+    let now = chrono::Utc::now().timestamp();
+    match state
+        .polymarket
+        .fetch_crowd_odds(&symbol, horizon, now)
+        .await
+    {
+        Ok(snapshot) => cached_json("public, s-maxage=30, stale-while-revalidate=300", &snapshot),
+        Err(error) => error_response(
+            StatusCode::BAD_GATEWAY,
+            json!({ "error": error.to_string() }),
+        ),
+    }
 }
 
 async fn sentiment(State(state): State<AppState>) -> Response {

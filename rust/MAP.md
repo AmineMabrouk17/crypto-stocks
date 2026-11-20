@@ -16,7 +16,7 @@ See [DECISIONS.md](DECISIONS.md). Domain vocabulary is in [GLOSSARY.md](GLOSSARY
 | fear and greed | `feargreed` | 1 | done |
 | coin gecko | `coingecko` | 1 | done |
 | news | `news` | 1 | done |
-| polymarket crowd odds | `polymarket` | 2 | open |
+| polymarket crowd odds | `polymarket` | 2 | done |
 | yahoo finance | `yahoo` | 2 | open |
 | LLM chat | `llm` | 2 | open |
 | asset resolver | `resolver` | 3 | open |

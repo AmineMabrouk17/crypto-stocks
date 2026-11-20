@@ -105,7 +105,7 @@ pub struct FearGreedIndex {
     pub time_until_update: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CrowdOddsHorizon {
     #[serde(rename = "4h")]

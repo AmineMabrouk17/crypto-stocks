@@ -4,6 +4,7 @@ pub mod config;
 pub mod error;
 pub mod json;
 pub mod types;
+pub mod url;
 
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 

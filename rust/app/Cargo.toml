@@ -15,6 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 axum.workspace = true
+chrono.workspace = true
 tokio.workspace = true
 tower-http.workspace = true
 tracing.workspace = true
@@ -25,6 +26,7 @@ crypto-stocks-common.workspace = true
 crypto-stocks-feargreed.workspace = true
 crypto-stocks-coingecko.workspace = true
 crypto-stocks-news.workspace = true
+crypto-stocks-polymarket.workspace = true
 
 [dev-dependencies]
 tower.workspace = true

@@ -5,6 +5,7 @@ use crypto_stocks_common::{
     client::{Http, HttpRequest},
     error::Result,
     types::{NewsArticle, Sentiment},
+    url::encode_uri_component,
 };
 use moka::future::Cache;
 use regex::Regex;
@@ -61,30 +62,6 @@ const NEGATIVE_WORDS: &[&str] = &[
 static ITEM_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?s)<item>(.*?)</item>").unwrap());
 static CDATA_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)^<!\[CDATA\[(.*)\]\]>$").unwrap());
-
-/// JS `encodeURIComponent`: keeps A-Z a-z 0-9 and `-_.!~*'()`, percent-encodes
-/// every other UTF-8 byte with uppercase hex.
-fn encode_uri_component(value: &str) -> String {
-    let mut encoded = String::with_capacity(value.len());
-    for byte in value.bytes() {
-        match byte {
-            b'A'..=b'Z'
-            | b'a'..=b'z'
-            | b'0'..=b'9'
-            | b'-'
-            | b'_'
-            | b'.'
-            | b'!'
-            | b'~'
-            | b'*'
-            | b'\''
-            | b'('
-            | b')' => encoded.push(byte as char),
-            _ => encoded.push_str(&format!("%{byte:02X}")),
-        }
-    }
-    encoded
-}
 
 /// Entity decode order matches the TS chain exactly, with `&amp;` last so
 /// double-encoded input (`&amp;lt;`) decodes the same way.
