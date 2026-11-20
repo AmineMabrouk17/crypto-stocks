@@ -12,6 +12,9 @@ out/
 .env
 .env*.local
 
+# rust
+rust/target/
+
 # misc
 .DS_Store
 *.tsbuildinfo

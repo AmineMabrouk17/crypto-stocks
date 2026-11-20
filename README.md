@@ -80,6 +80,7 @@ It's designed to be **fast, private, and zero-setup**: all market data comes fro
 
 | Layer | Technology |
 |-------|------------|
+| Backend | Rust (axum, tokio, reqwest, serde, moka) |
 | Framework | Next.js 16 (App Router, React 19, TypeScript) |
 | Styling | Tailwind CSS v4, `cva`, `tailwind-merge` |
 | Charts | `lightweight-charts` |
@@ -122,6 +123,7 @@ All market data comes from free, read-only APIs — **no credentials needed**:
 ### Prerequisites
 - **Node.js 22+**
 - **pnpm 10+**
+- **Rust stable** (rustup; `cargo` must be on `PATH`)
 
 ### Run locally
 
@@ -129,8 +131,12 @@ All market data comes from free, read-only APIs — **no credentials needed**:
 # install dependencies
 pnpm install
 
-# start the dev server (apps/web on http://localhost:3000)
+# start the Rust backend (:8080) and Next.js frontend (:3000)
 pnpm dev
+
+# start only one side
+pnpm dev:backend
+pnpm dev:web
 
 # lint, typecheck, test, build
 pnpm lint
@@ -138,6 +144,12 @@ pnpm tsc
 pnpm test
 pnpm build
 ```
+
+The frontend proxies every `/api/*` request to the Rust backend. Set
+`BACKEND_ORIGIN` in `apps/web/.env.local` (see `apps/web/.env.example`) if the
+backend is not on `http://127.0.0.1:8080`. The backend itself is configured by
+`HOST`, `PORT`, `CORS_ORIGINS`, `GEMINI_API_KEY`, `GROQ_API_KEY` and the optional
+upstream URL/timeout variables documented in the root `.env.example`.
 
 > **Note for US deployments**: Binance geo-blocks US IPs. Swap the base URLs in `packages/lib/src/constants.ts` to `api.binance.us` / `stream.binance.us` if deploying from the US.
 
@@ -151,7 +163,11 @@ crypto-stocks/
 │       ├── components/       # dashboard, chart, chat, motion, settings
 │       └── lib/              # client hooks (SWR, alerts, LLM settings)
 ├── packages/
-│   └── lib/                  # @crypto-stocks/lib — providers, parsing, tests
+│   └── lib/                  # @crypto-stocks/lib — shared types and client helpers
+├── rust/
+│   ├── app/                  # axum HTTP front door (owns /api/*)
+│   ├── crates/               # one crate per ported backend module
+│   └── MAP.md                # migration plan and state
 ├── docs/
 │   └── adr/                  # architectural decision records
 ├── package.json              # Turborepo root
@@ -160,7 +176,7 @@ crypto-stocks/
 
 ## 🏗️ Architecture Notes
 
-- **Server-side proxies** (`/api/*`) fetch from third-party APIs and attach `Cache-Control` headers — clients never hit the providers directly, absorbing rate limits (e.g., Polymarket Gamma is 300 req/10s per IP, shared across visitors).
+- **Server-side proxies** (`/api/*`) are served by the Rust axum service, which owns a pooled `reqwest` client, in-process moka caches with single-flight deduplication, per-upstream timeouts and retries. Clients never hit the providers directly, absorbing rate limits (e.g., Polymarket Gamma is 300 req/10s per IP, shared across visitors).
 - **Database-free & private**: no Supabase, no accounts, no user data. AI keys stay in the browser.
 - **Decision-rich parsing lives in the shared lib** and is unit-tested against real API fixtures (`packages/lib/src/*.test.ts`).
 - Architecture decisions are recorded in `docs/adr/`.
