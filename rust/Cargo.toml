@@ -1,0 +1,52 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/common",
+  "crates/feargreed",
+  "crates/coingecko",
+  "crates/news",
+  "crates/polymarket",
+  "crates/yahoo",
+  "crates/llm",
+  "crates/resolver",
+  "app",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "UNLICENSED"
+publish = false
+
+[workspace.dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = [
+  "json",
+  "rustls-tls",
+  "gzip",
+  "brotli",
+  "http2",
+] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+moka = { version = "0.12", features = ["future"] }
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+thiserror = "2"
+anyhow = "1"
+regex = "1"
+chrono = { version = "0.4", features = ["serde"] }
+chrono-tz = "0.10"
+futures = "0.3"
+tower = { version = "0.5", features = ["util"] }
+wiremock = "0.6"
+crypto-stocks-common = { path = "crates/common" }
+crypto-stocks-feargreed = { path = "crates/feargreed" }
+crypto-stocks-coingecko = { path = "crates/coingecko" }
+crypto-stocks-news = { path = "crates/news" }
+crypto-stocks-polymarket = { path = "crates/polymarket" }
+crypto-stocks-yahoo = { path = "crates/yahoo" }
+crypto-stocks-llm = { path = "crates/llm" }
+crypto-stocks-resolver = { path = "crates/resolver" }

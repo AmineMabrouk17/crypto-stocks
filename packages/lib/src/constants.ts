@@ -6,19 +6,6 @@ export const BINANCE_WS_BASE = "wss://stream.binance.com:9443";
 
 export const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
 
-export const YAHOO_QUERY_BASE = "https://query1.finance.yahoo.com";
-export const YAHOO_FC_BASE = "https://fc.yahoo.com";
-
-export const ALTERNATIVE_ME_FNG_BASE = "https://api.alternative.me/fng";
-
-export const POLYMARKET_GAMMA_BASE = "https://gamma-api.polymarket.com";
-export const POLYMARKET_CLOB_BASE = "https://clob.polymarket.com";
-
-export const GEMINI_MODEL = "gemini-1.5-flash";
-export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta";
-
-export const GROQ_API_BASE = "https://api.groq.com/openai/v1";
-
 export const FREE_MODELS: FreeModel[] = [
   { id: "gemini-1.5-flash", label: "Gemini 1.5 Flash", provider: "gemini", modelId: "gemini-1.5-flash" },
   { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash", provider: "gemini", modelId: "gemini-2.0-flash" },
@@ -28,8 +15,6 @@ export const FREE_MODELS: FreeModel[] = [
   { id: "groq-llama-3.3-70b", label: "Groq Llama 3.3 70B", provider: "groq", modelId: "llama-3.3-70b-versatile" },
   { id: "groq-llama-3.1-8b", label: "Groq Llama 3.1 8B", provider: "groq", modelId: "llama-3.1-8b-instant" },
 ];
-
-export const GOOGLE_NEWS_RSS_BASE = "https://news.google.com/rss/search";
 
 export const DEFAULT_WATCHLIST: AssetRef[] = [
   { kind: "crypto", symbol: "BTCUSDT", id: "bitcoin", name: "Bitcoin" },

@@ -3,13 +3,19 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
+    "dev": "concurrently -n backend,web -c green,blue \"pnpm dev:backend\" \"pnpm dev:web\"",
+    "dev:backend": "cargo run --manifest-path rust/Cargo.toml",
+    "dev:web": "turbo run dev",
+    "build": "cargo build --manifest-path rust/Cargo.toml --release && pnpm build:web",
+    "build:web": "turbo run build",
     "lint": "turbo run lint",
     "tsc": "turbo run tsc",
-    "test": "turbo run test"
+    "test": "cargo test --manifest-path rust/Cargo.toml && turbo run test",
+    "rust:fmt": "cargo fmt --manifest-path rust/Cargo.toml --all -- --check",
+    "rust:clippy": "cargo clippy --manifest-path rust/Cargo.toml --all -- -D warnings"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "turbo": "^2.10.7",
     "typescript": "^5.6.0"
   }

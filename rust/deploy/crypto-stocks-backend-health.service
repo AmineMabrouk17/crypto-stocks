@@ -1,0 +1,7 @@
+[Unit]
+Description=Health-check the Crypto Stocks Rust backend and restart it if stuck
+After=crypto-stocks-backend.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env bash -c 'curl -fsS --max-time 5 http://127.0.0.1:8080/health >/dev/null || systemctl restart crypto-stocks-backend'
