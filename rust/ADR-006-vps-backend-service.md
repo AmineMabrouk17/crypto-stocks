@@ -30,9 +30,11 @@ that host.
 3. **Installer is in the repo:** `rust/deploy/install-vps-service.sh` plus the
    unit/timer files in `rust/deploy/`. Rebuilding and re-running the installer
    is the deploy procedure.
-4. **Vercel points at this VPS:** set `BACKEND_ORIGIN` to the VPS origin
-   (`http://<vps-ip>:8080`) in the Vercel project. The rewrite is server-side, so
-   no browser mixed-content issue.
+4. **Vercel points at this VPS:** production builds of `next.config.ts` default
+   `BACKEND_ORIGIN` to the VPS origin (`http://88.99.81.55:8080`); local dev uses
+   `http://127.0.0.1:8080`. An explicit `BACKEND_ORIGIN` env var overrides both.
+   This makes a production deploy correct without a manual dashboard step. The
+   rewrite is server-side, so there is no browser mixed-content issue.
 
 ## Consequences
 

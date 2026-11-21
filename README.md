@@ -167,8 +167,10 @@ systemctl status crypto-stocks-backend
 journalctl -u crypto-stocks-backend -f
 ```
 
-Set `BACKEND_ORIGIN` on the frontend host to the VPS origin so the `/api/*`
-rewrite reaches it. See [`rust/ADR-006-vps-backend-service.md`](rust/ADR-006-vps-backend-service.md).
+Production builds default the `/api/*` rewrite to the VPS origin
+(`http://88.99.81.55:8080`); local dev uses `http://127.0.0.1:8080`. Set
+`BACKEND_ORIGIN` on the frontend host to override either. See
+[`rust/ADR-006-vps-backend-service.md`](rust/ADR-006-vps-backend-service.md).
 
 `GET /api/assets/resolve?symbol=&idHint=` is called once per asset navigation
 (shared by `generateMetadata` and the page via React `cache()`), replacing the
