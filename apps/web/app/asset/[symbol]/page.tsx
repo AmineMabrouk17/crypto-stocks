@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AssetDetailView } from "@/components/asset/AssetDetailView";
 import { ThemeToggle } from "@/components/motion/theme-toggle";
-import { resolveAsset } from "@/lib/resolveAsset";
+import { resolveAsset } from "@/lib/resolveAssetCached";
 
 interface AssetPageProps {
   params: Promise<{ symbol: string }>;

@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum AssetKind {
     Crypto,
+    #[default]
     Stock,
 }
 
@@ -14,6 +15,14 @@ pub struct AssetRef {
     pub symbol: String,
     pub id: String,
     pub name: String,
+}
+
+/// Wire shape of the one-time asset resolution endpoint and of the TS
+/// `ResolvedAsset` returned by `resolveAsset`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ResolvedAsset {
+    pub asset: AssetRef,
+    pub summary: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -40,7 +49,10 @@ pub struct DayStats {
 pub struct AssetDescription {
     pub name: String,
     pub summary: String,
-    pub extra: serde_json::Map<String, Value>,
+    /// Absent in the TS `fetchYahooDescription` response; present (possibly
+    /// empty) in `fetchCoinDescription`. `None` omits the key entirely.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub extra: Option<serde_json::Map<String, Value>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -160,6 +172,52 @@ pub struct CrowdOddsSnapshot {
     pub down_probability: f64,
     pub end_time: String,
     pub available_horizons: Vec<CrowdOddsHorizon>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ChatMessage {
+    pub role: String,
+    pub content: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum LlmProvider {
+    Gemini,
+    Openai,
+    Anthropic,
+    Groq,
+    Custom,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LlmSettings {
+    pub provider: LlmProvider,
+    pub api_key: String,
+    pub model: String,
+    pub custom_base_url: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatRequestBody {
+    #[serde(default)]
+    pub messages: Vec<ChatMessage>,
+    #[serde(default)]
+    pub asset: ChatAsset,
+    pub live_price: Option<f64>,
+    pub market_stats: Option<MarketStats>,
+    pub description: Option<String>,
+    pub llm_settings: Option<LlmSettings>,
+    pub free_model_id: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub struct ChatAsset {
+    pub name: String,
+    pub symbol: String,
+    pub kind: AssetKind,
 }
 
 pub fn camel_value(fields: Vec<(&str, Value)>) -> Value {

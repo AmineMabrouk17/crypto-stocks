@@ -328,8 +328,11 @@ dependencies = [
  "crypto-stocks-coingecko",
  "crypto-stocks-common",
  "crypto-stocks-feargreed",
+ "crypto-stocks-llm",
  "crypto-stocks-news",
  "crypto-stocks-polymarket",
+ "crypto-stocks-resolver",
+ "crypto-stocks-yahoo",
  "serde",
  "serde_json",
  "tokio",
@@ -376,6 +379,13 @@ dependencies = [
 [[package]]
 name = "crypto-stocks-llm"
 version = "0.1.0"
+dependencies = [
+ "crypto-stocks-common",
+ "serde",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
 
 [[package]]
 name = "crypto-stocks-news"
@@ -404,10 +414,26 @@ dependencies = [
 [[package]]
 name = "crypto-stocks-resolver"
 version = "0.1.0"
+dependencies = [
+ "crypto-stocks-coingecko",
+ "crypto-stocks-common",
+ "crypto-stocks-yahoo",
+ "serde",
+ "tokio",
+ "wiremock",
+]
 
 [[package]]
 name = "crypto-stocks-yahoo"
 version = "0.1.0"
+dependencies = [
+ "crypto-stocks-common",
+ "moka",
+ "serde",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
 
 [[package]]
 name = "deadpool"

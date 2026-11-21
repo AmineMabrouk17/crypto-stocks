@@ -6,3 +6,11 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+crypto-stocks-common.workspace = true
+crypto-stocks-coingecko.workspace = true
+crypto-stocks-yahoo.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true
+wiremock.workspace = true

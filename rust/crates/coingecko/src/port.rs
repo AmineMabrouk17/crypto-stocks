@@ -88,12 +88,13 @@ fn map_coin_description(data: &CoinGeckoCoinResponse) -> AssetDescription {
     AssetDescription {
         name: data.name.clone(),
         summary,
-        extra,
+        extra: Some(extra),
     }
 }
 
 /// Coin list is cached for 24 h; descriptions get a short cache purely for
 /// in-flight deduplication (the TS module had no persistent description cache).
+#[derive(Clone)]
 pub struct CoinGeckoService {
     http: Arc<Http>,
     base: String,
@@ -160,12 +161,10 @@ mod tests {
         let description = map_coin_description(&data);
         assert_eq!(description.name, "Bitcoin");
         assert_eq!(description.summary, "Bitcoin is digital cash.");
-        assert_eq!(description.extra["marketCapRank"], json!(1));
-        assert_eq!(description.extra["priceUsd"], json!(67000.5));
-        assert_eq!(
-            description.extra["marketCapUsd"].as_f64(),
-            Some(1_320_000_000_000.0)
-        );
+        let extra = description.extra.as_ref().unwrap();
+        assert_eq!(extra["marketCapRank"], json!(1));
+        assert_eq!(extra["priceUsd"], json!(67000.5));
+        assert_eq!(extra["marketCapUsd"].as_f64(), Some(1_320_000_000_000.0));
     }
 
     #[test]
@@ -175,7 +174,7 @@ mod tests {
                 .unwrap();
         let description = map_coin_description(&data);
         assert_eq!(description.summary, "Example Coin is a cryptocurrency.");
-        assert!(description.extra.is_empty());
+        assert!(description.extra.as_ref().unwrap().is_empty());
     }
 
     #[test]

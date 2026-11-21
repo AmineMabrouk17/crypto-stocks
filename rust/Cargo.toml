@@ -47,3 +47,6 @@ crypto-stocks-feargreed = { path = "crates/feargreed" }
 crypto-stocks-coingecko = { path = "crates/coingecko" }
 crypto-stocks-news = { path = "crates/news" }
 crypto-stocks-polymarket = { path = "crates/polymarket" }
+crypto-stocks-yahoo = { path = "crates/yahoo" }
+crypto-stocks-llm = { path = "crates/llm" }
+crypto-stocks-resolver = { path = "crates/resolver" }

@@ -27,6 +27,9 @@ crypto-stocks-feargreed.workspace = true
 crypto-stocks-coingecko.workspace = true
 crypto-stocks-news.workspace = true
 crypto-stocks-polymarket.workspace = true
+crypto-stocks-yahoo.workspace = true
+crypto-stocks-llm.workspace = true
+crypto-stocks-resolver.workspace = true
 
 [dev-dependencies]
 tower.workspace = true

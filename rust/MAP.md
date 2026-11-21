@@ -17,9 +17,9 @@ See [DECISIONS.md](DECISIONS.md). Domain vocabulary is in [GLOSSARY.md](GLOSSARY
 | coin gecko | `coingecko` | 1 | done |
 | news | `news` | 1 | done |
 | polymarket crowd odds | `polymarket` | 2 | done |
-| yahoo finance | `yahoo` | 2 | open |
-| LLM chat | `llm` | 2 | open |
-| asset resolver | `resolver` | 3 | open |
+| yahoo finance | `yahoo` | 3 | done |
+| LLM chat | `llm` | 3 | done |
+| asset resolver | `resolver` | 3 | done |
 | endpoint integration tests | `app/tests` | 4 | open |
 | dev/build/docs wiring | root, `apps/web` | 5 | open |
 | dead TypeScript removal | old backend | 6 | open |
