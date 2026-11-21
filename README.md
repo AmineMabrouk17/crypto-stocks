@@ -84,9 +84,9 @@ It's designed to be **fast, private, and zero-setup**: all market data comes fro
 | Framework | Next.js 16 (App Router, React 19, TypeScript) |
 | Styling | Tailwind CSS v4, `cva`, `tailwind-merge` |
 | Charts | `lightweight-charts` |
-| Data fetching | SWR + server-side proxy routes with `Cache-Control` |
+| Data fetching | SWR client hooks + Rust `/api/*` proxy with `Cache-Control` |
 | Monorepo | pnpm workspaces + Turborepo |
-| Testing | Vitest (unit tests with real API fixtures) |
+| Testing | Cargo tests + wiremock endpoint parity tests |
 | LLMs | Gemini, Groq, OpenAI, Anthropic, custom OpenAI-compatible endpoints |
 
 ## 🔌 Data Sources
@@ -151,6 +151,17 @@ backend is not on `http://127.0.0.1:8080`. The backend itself is configured by
 `HOST`, `PORT`, `CORS_ORIGINS`, `GEMINI_API_KEY`, `GROQ_API_KEY` and the optional
 upstream URL/timeout variables documented in the root `.env.example`.
 
+To run the backend in a container:
+
+```bash
+docker build -f rust/Dockerfile -t crypto-stocks-backend rust/
+docker run --rm -p 8080:8080 -e GEMINI_API_KEY=... crypto-stocks-backend
+```
+
+`GET /api/assets/resolve?symbol=&idHint=` is called once per asset navigation
+(shared by `generateMetadata` and the page via React `cache()`), replacing the
+old double server-side resolution.
+
 > **Note for US deployments**: Binance geo-blocks US IPs. Swap the base URLs in `packages/lib/src/constants.ts` to `api.binance.us` / `stream.binance.us` if deploying from the US.
 
 ## 📁 Project Structure
@@ -159,15 +170,18 @@ upstream URL/timeout variables documented in the root `.env.example`.
 crypto-stocks/
 ├── apps/
 │   └── web/                  # Next.js dashboard (main app)
-│       ├── app/              # routes: /, /asset/[symbol], /api/*
+│       ├── app/              # routes: /, /asset/[symbol]
 │       ├── components/       # dashboard, chart, chat, motion, settings
-│       └── lib/              # client hooks (SWR, alerts, LLM settings)
+│       └── lib/              # client hooks (SWR, alerts, LLM settings, resolver cache)
 ├── packages/
-│   └── lib/                  # @crypto-stocks/lib — shared types and client helpers
+│   └── lib/                  # @crypto-stocks/lib — client-safe types & helpers
 ├── rust/
 │   ├── app/                  # axum HTTP front door (owns /api/*)
+│   │   └── tests/            # wiremock endpoint parity tests
 │   ├── crates/               # one crate per ported backend module
-│   └── MAP.md                # migration plan and state
+│   ├── Dockerfile            # multi-stage backend image
+│   ├── MAP.md                # migration plan and state
+│   └── DECISIONS.md          # architecture decisions
 ├── docs/
 │   └── adr/                  # architectural decision records
 ├── package.json              # Turborepo root
@@ -177,9 +191,9 @@ crypto-stocks/
 ## 🏗️ Architecture Notes
 
 - **Server-side proxies** (`/api/*`) are served by the Rust axum service, which owns a pooled `reqwest` client, in-process moka caches with single-flight deduplication, per-upstream timeouts and retries. Clients never hit the providers directly, absorbing rate limits (e.g., Polymarket Gamma is 300 req/10s per IP, shared across visitors).
-- **Database-free & private**: no Supabase, no accounts, no user data. AI keys stay in the browser.
-- **Decision-rich parsing lives in the shared lib** and is unit-tested against real API fixtures (`packages/lib/src/*.test.ts`).
-- Architecture decisions are recorded in `docs/adr/`.
+- **Database-free & private**: no Supabase, no accounts, no user data. AI keys stay in the browser or are passed via env vars on the backend.
+- **Decision-rich parsing lives in Rust** and is unit-tested against recorded fixtures; every endpoint also has a wiremock test asserting response-shape parity (`rust/app/tests/`).
+- Architecture decisions are recorded in `rust/DECISIONS.md`.
 
 ## 🤝 Contributing
 

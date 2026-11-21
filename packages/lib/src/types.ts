@@ -102,3 +102,41 @@ export interface NewsArticle {
   /** Lightweight keyword-heuristic tag, not real sentiment analysis. */
   sentiment?: "positive" | "negative" | "neutral";
 }
+
+// Response-shape types for Rust-backed /api endpoints. Kept client-safe so
+// SWR consumers can type their fetches without importing server code.
+
+export interface FearGreedIndex {
+  /** 0 (Extreme Fear) to 100 (Extreme Greed). */
+  value: number;
+  /** e.g. "Extreme Fear", "Fear", "Neutral", "Greed", "Extreme Greed". */
+  classification: string;
+  /** Unix seconds of the reading. */
+  timestamp: number;
+  /** Seconds until the next daily update. */
+  timeUntilUpdate: number;
+}
+
+export type CrowdOddsHorizon = "4h" | "1D" | "1W";
+
+/** Normalized Polymarket market record with decoded outcome arrays. */
+export interface PolymarketMarket {
+  id: string;
+  slug: string;
+  question: string;
+  outcomes: string[];
+  outcomePrices: number[];
+  clobTokenIds: string[];
+  startDate: string;
+  endDate: string;
+  active: boolean;
+  closed: boolean;
+}
+
+export interface CrowdOddsSnapshot {
+  market: PolymarketMarket | null;
+  upProbability: number;
+  downProbability: number;
+  endTime: string;
+  availableHorizons: CrowdOddsHorizon[];
+}

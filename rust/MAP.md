@@ -20,9 +20,9 @@ See [DECISIONS.md](DECISIONS.md). Domain vocabulary is in [GLOSSARY.md](GLOSSARY
 | yahoo finance | `yahoo` | 3 | done |
 | LLM chat | `llm` | 3 | done |
 | asset resolver | `resolver` | 3 | done |
-| endpoint integration tests | `app/tests` | 4 | open |
-| dev/build/docs wiring | root, `apps/web` | 5 | open |
-| dead TypeScript removal | old backend | 6 | open |
+| endpoint integration tests | `app/tests` | 4 | done |
+| dev/build/docs wiring | root, `apps/web` | 5 | done |
+| dead TypeScript removal | old backend | 6 | done |
 
 ## Checkpoints
 
