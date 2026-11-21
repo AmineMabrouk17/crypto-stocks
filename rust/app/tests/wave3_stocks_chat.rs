@@ -269,6 +269,19 @@ async fn chat_matches_ts_shape_for_byok_and_free_models() {
 }
 
 #[tokio::test]
+async fn empty_symbol_is_rejected_like_ts_falsy_check() {
+    let config = test_config("http://127.0.0.1:1");
+    for uri in [
+        "/api/stocks/quote?symbol=&range=1d&interval=1m",
+        "/api/stocks/profile?symbol=",
+    ] {
+        let (status, _, body) = get(uri, config.clone()).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "uri: {uri}");
+        assert_eq!(body, json!({ "error": "Missing symbol" }), "uri: {uri}");
+    }
+}
+
+#[tokio::test]
 async fn chat_maps_upstream_failures_to_502() {
     let upstream = MockServer::start().await;
     Mock::given(method("POST"))

@@ -183,7 +183,8 @@ struct QuoteQuery {
 }
 
 async fn stock_quote(State(state): State<AppState>, Query(query): Query<QuoteQuery>) -> Response {
-    let Some(symbol) = query.symbol.as_deref() else {
+    // TS treats an empty `symbol=` as missing (`if (!symbol)`), so reject it here too.
+    let Some(symbol) = query.symbol.as_deref().filter(|s| !s.is_empty()) else {
         return error_response(
             StatusCode::BAD_REQUEST,
             json!({ "error": "Missing symbol" }),
@@ -235,7 +236,8 @@ async fn stock_profile(
     State(state): State<AppState>,
     Query(query): Query<ProfileQuery>,
 ) -> Response {
-    let Some(symbol) = query.symbol.as_deref() else {
+    // TS treats an empty `symbol=` as missing (`if (!symbol)`), so reject it here too.
+    let Some(symbol) = query.symbol.as_deref().filter(|s| !s.is_empty()) else {
         return error_response(
             StatusCode::BAD_REQUEST,
             json!({ "error": "Missing symbol" }),
