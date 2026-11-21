@@ -1,0 +1,31 @@
+[Unit]
+Description=Crypto Stocks Rust backend (axum /api/* service)
+Documentation=https://github.com/AmineMabrouk17/crypto-stocks
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=crypto-stocks
+Group=crypto-stocks
+EnvironmentFile=/etc/crypto-stocks-backend.env
+WorkingDirectory=/opt/crypto-stocks-backend
+ExecStart=/opt/crypto-stocks-backend/crypto-stocks-backend
+Restart=always
+RestartSec=2
+TimeoutStopSec=15
+KillSignal=SIGTERM
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=crypto-stocks-backend
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/crypto-stocks-backend
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

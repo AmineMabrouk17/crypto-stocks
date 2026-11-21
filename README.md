@@ -158,6 +158,18 @@ docker build -f rust/Dockerfile -t crypto-stocks-backend rust/
 docker run --rm -p 8080:8080 -e GEMINI_API_KEY=... crypto-stocks-backend
 ```
 
+On a systemd host (including the production VPS), install it as a supervised
+service with automatic restart and a 1-minute health watchdog:
+
+```bash
+sudo bash rust/deploy/install-vps-service.sh
+systemctl status crypto-stocks-backend
+journalctl -u crypto-stocks-backend -f
+```
+
+Set `BACKEND_ORIGIN` on the frontend host to the VPS origin so the `/api/*`
+rewrite reaches it. See [`rust/ADR-006-vps-backend-service.md`](rust/ADR-006-vps-backend-service.md).
+
 `GET /api/assets/resolve?symbol=&idHint=` is called once per asset navigation
 (shared by `generateMetadata` and the page via React `cache()`), replacing the
 old double server-side resolution.
@@ -179,9 +191,11 @@ crypto-stocks/
 │   ├── app/                  # axum HTTP front door (owns /api/*)
 │   │   └── tests/            # wiremock endpoint parity tests
 │   ├── crates/               # one crate per ported backend module
+│   ├── deploy/               # systemd units + VPS installer
 │   ├── Dockerfile            # multi-stage backend image
 │   ├── MAP.md                # migration plan and state
-│   └── DECISIONS.md          # architecture decisions
+│   ├── DECISIONS.md          # architecture decisions
+│   └── ADR-006-vps-backend-service.md
 ├── docs/
 │   └── adr/                  # architectural decision records
 ├── package.json              # Turborepo root

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the Crypto Stocks backend health check every minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+AccuracySec=10s
+Unit=crypto-stocks-backend-health.service
+
+[Install]
+WantedBy=timers.target

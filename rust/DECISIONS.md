@@ -57,3 +57,11 @@ Context: parity must be demonstrated before deleting the reference.
 
 Decision: remove server-only TypeScript in the final commit after all gates,
 tests, benchmarks and the PR table are recorded. Keep client-only helpers.
+
+## ADR-006: supervised VPS service
+
+Status: accepted (2026-11-21)
+
+Full text: [`ADR-006-vps-backend-service.md`](./ADR-006-vps-backend-service.md).
+The Rust backend runs as a hardened systemd service with automatic restarts and
+a 1-minute health watchdog on this VPS; Vercel rewrites `/api/*` to it.
