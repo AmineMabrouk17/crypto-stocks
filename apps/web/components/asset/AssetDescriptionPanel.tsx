@@ -45,7 +45,7 @@ export function AssetDescriptionPanel({
   return (
     <div className="glass-tile flex flex-col rounded-3xl p-4 text-sm sm:p-5 lg:p-6">
       <div className="flex items-center gap-2 border-b border-black/5 pb-3 text-sm dark:border-white/[0.06]">
-        <BookOpenText className="h-4 w-4 text-amber-500" />
+        <BookOpenText className="h-4 w-4 text-amber-600 dark:text-amber-500" />
         <h3 className="font-bold tracking-tight text-zinc-900 dark:text-white">About {asset.name}</h3>
       </div>
 

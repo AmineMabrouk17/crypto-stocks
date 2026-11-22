@@ -102,7 +102,7 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
       >
         <Bell className="h-3.5 w-3.5" />
         {activeAlerts.length > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-black/5 bg-indigo-600 px-1 text-[9px] font-semibold leading-none text-white dark:border-white/10">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-black/5 bg-indigo-600 px-1 text-[10px] font-semibold leading-none text-white dark:border-white/10">
             {activeAlerts.length}
           </span>
         )}
@@ -226,13 +226,13 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
                   >
                     <span className="flex items-center gap-1.5 font-mono">
                       {alert.direction === "above" ? (
-                        <TrendingUp className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                        <TrendingUp className="h-3 w-3 text-signal-up" />
                       ) : (
-                        <TrendingDown className="h-3 w-3 text-red-600 dark:text-red-400" />
+                        <TrendingDown className="h-3 w-3 text-signal-down" />
                       )}
                       {formatCurrency(alert.targetPrice, decimalsForPrice(alert.targetPrice))}
                       {scope === "paused" && (
-                        <span className="rounded bg-amber-500/15 px-1 text-[9px] font-semibold uppercase leading-4 tracking-wide text-amber-700 dark:text-amber-400">
+                        <span className="rounded bg-amber-500/15 px-1 text-[10px] font-semibold uppercase leading-4 tracking-wide text-amber-700 dark:text-amber-400">
                           paused
                         </span>
                       )}
@@ -241,7 +241,7 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
                       type="button"
                       onClick={() => removeAlert(alert.id)}
                       aria-label={`Remove alert at ${alert.targetPrice}`}
-                      className="rounded px-1 text-zinc-400 hover:bg-black/10 hover:text-zinc-700 dark:hover:bg-white/10 dark:hover:text-zinc-200"
+                      className="rounded px-1 text-zinc-500 hover:bg-black/10 hover:text-zinc-700 dark:hover:bg-white/10 dark:hover:text-zinc-200"
                     >
                       <X className="h-3 w-3" />
                     </button>

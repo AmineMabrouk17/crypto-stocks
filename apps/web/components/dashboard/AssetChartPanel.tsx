@@ -80,7 +80,7 @@ function AssetHeader({
               }
               aria-label={`Open ${asset.symbol} full page`}
               title="Open full page"
-              className="text-zinc-400 transition hover:text-emerald-600 dark:text-zinc-500 dark:hover:text-emerald-400"
+              className="text-zinc-500 transition hover:text-signal-up dark:text-zinc-400"
             >
               <ExternalLink className="h-3.5 w-3.5" />
             </Link>
@@ -111,7 +111,7 @@ function AssetHeader({
           {stats.changePercent != null && (
             <span
               className={`text-sm font-semibold tabular-nums ${
-                positive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                positive ? "text-signal-up" : "text-signal-down"
               }`}
             >
               {positive ? "+" : ""}
@@ -163,7 +163,7 @@ function StatsRow({ stats, statsWindowLabel }: { stats: DayStats; statsWindowLab
             />
           )}
           <span className="px-1">
-            <span className="block font-sans text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <span className="block font-sans text-xs uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
               {seg.label}
             </span>
             <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">{seg.value}</span>
