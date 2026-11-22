@@ -81,7 +81,8 @@ export interface DayStats {
 
 /**
  * A user-defined target-price trigger. Evaluated only while its asset is the
- * one currently selected/streaming in the dashboard (see usePriceAlerts).
+ * one currently selected/streaming in the dashboard and this tab is open
+ * (see usePriceAlerts) — there is no background worker.
  */
 export interface PriceAlert {
   id: string;
@@ -92,6 +93,14 @@ export interface PriceAlert {
   direction: "above" | "below";
   createdAt: number;
   triggeredAt: number | null;
+  /** Last time the watcher evaluated this alert while its asset was open, or null if never. */
+  lastCheckedAt: number | null;
+  /**
+   * When tracking stopped because the tab closed or the asset was switched
+   * away; null while the alert is actively watched. Persisted so the panel can
+   * say the alert is paused instead of implying it is still live.
+   */
+  pausedAt: number | null;
 }
 
 export interface NewsArticle {
