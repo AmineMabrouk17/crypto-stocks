@@ -3,15 +3,17 @@
 import { fetchCoinDescription, type AssetDescription, type AssetRef } from "@crypto-stocks/lib";
 import { BookOpenText } from "lucide-react";
 import { useEffect } from "react";
-import useSWR from "swr";
-import { Loader } from "../motion/loader";
+import { ApiError } from "@/lib/api-error";
+import { usePanelQuery } from "@/lib/usePanelQuery";
+import { cn } from "@/lib/utils";
+import { PanelStatus } from "../feedback/PanelStatus";
 
 async function fetchDescription(asset: AssetRef): Promise<AssetDescription> {
   if (asset.kind === "crypto") {
     return fetchCoinDescription(asset.id);
   }
   const res = await fetch(`/api/stocks/profile?symbol=${encodeURIComponent(asset.symbol)}`);
-  if (!res.ok) throw new Error("Failed to load profile");
+  if (!res.ok) throw new ApiError(res.status);
   return res.json();
 }
 
@@ -26,16 +28,15 @@ export function AssetDescriptionPanel({
   asset: AssetRef;
   onLoaded?: (summary: string | null) => void;
 }) {
-  const {
-    data: description,
-    error,
-    isLoading: loading,
-  } = useSWR<AssetDescription>(
-    ["asset-description", asset.kind, asset.kind === "crypto" ? asset.id : asset.symbol],
-    () => fetchDescription(asset),
-    { dedupingInterval: DEDUPING_INTERVAL_MS, revalidateOnFocus: false },
-  );
-  const errored = Boolean(error);
+  const { data: description, failure, isLoading, isStale, isRetrying, lastUpdatedAt, retry } =
+    usePanelQuery<AssetDescription>(
+      `asset-description:${asset.kind}:${asset.kind === "crypto" ? asset.id : asset.symbol}`,
+      () => fetchDescription(asset),
+      { dedupingInterval: DEDUPING_INTERVAL_MS, revalidateOnFocus: false },
+    );
+
+  const summary = description?.summary.trim() ?? "";
+  const hasDescription = summary.length > 0;
 
   useEffect(() => {
     if (description) onLoaded?.(description.summary);
@@ -49,18 +50,28 @@ export function AssetDescriptionPanel({
         <h3 className="font-bold tracking-tight text-zinc-900 dark:text-white">About {asset.name}</h3>
       </div>
 
-      <div className="flex flex-col justify-start pt-3.5">
-        {loading && (
-          <div className="flex items-center gap-2 py-4 text-zinc-500 dark:text-zinc-400">
-            <Loader variant="dots" size={16} />
-            Loading description…
-          </div>
-        )}
-        {errored && !loading && (
-          <p className="py-2 text-zinc-500 dark:text-zinc-400">Description unavailable right now.</p>
-        )}
-        {!loading && !errored && description && (
-          <p className="leading-relaxed text-zinc-600 dark:text-zinc-300">{description.summary}</p>
+      <div className="flex flex-col justify-start gap-2 pt-3.5">
+        <PanelStatus
+          subject="description"
+          loading={isLoading}
+          failure={failure}
+          hasData={hasDescription}
+          emptyMessage={`No description available for ${asset.name} yet.`}
+          isRetrying={isRetrying}
+          lastUpdatedAt={lastUpdatedAt}
+          onRetry={retry}
+          className={hasDescription ? undefined : "py-2"}
+        />
+        {hasDescription && (
+          <p
+            aria-busy={isStale || undefined}
+            className={cn(
+              "leading-relaxed text-zinc-600 transition-opacity duration-200 dark:text-zinc-300",
+              isStale && "opacity-60",
+            )}
+          >
+            {summary}
+          </p>
         )}
       </div>
     </div>

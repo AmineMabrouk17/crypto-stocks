@@ -1,10 +1,19 @@
 "use client";
 
 import type { FearGreedIndex } from "@crypto-stocks/lib";
-import useSWR from "swr";
-import { Loader } from "../motion/loader";
+import { fetchJson } from "@/lib/api-error";
+import { usePanelQuery } from "@/lib/usePanelQuery";
+import { cn } from "@/lib/utils";
+import { PanelStatus } from "../feedback/PanelStatus";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+async function fetchSentiment(): Promise<FearGreedIndex> {
+  const payload = await fetchJson<FearGreedIndex>("/api/signals/sentiment");
+  // A 200 that isn't a reading is a failure, not a zero.
+  if (typeof payload.value !== "number" || typeof payload.classification !== "string") {
+    throw new Error("Unexpected sentiment response");
+  }
+  return payload;
+}
 
 const CLASS_COLOR: Record<string, string> = {
   "Extreme Fear": "text-signal-down border-rose-500/30 bg-rose-500/10",
@@ -16,10 +25,11 @@ const CLASS_COLOR: Record<string, string> = {
 
 export function SentimentIndex() {
   // The Fear & Greed index updates daily, so a slow refresh is plenty.
-  const { data, isLoading, error } = useSWR<FearGreedIndex>("/api/signals/sentiment", fetcher, {
-    refreshInterval: 60 * 60 * 1000,
-    revalidateOnFocus: true,
-  });
+  const { data, failure, isLoading, isStale, isRetrying, lastUpdatedAt, retry } =
+    usePanelQuery<FearGreedIndex>("/api/signals/sentiment", fetchSentiment, {
+      refreshInterval: 60 * 60 * 1000,
+      revalidateOnFocus: true,
+    });
 
   return (
     <div className="glass-tile flex h-full flex-col gap-3 rounded-3xl p-4 sm:p-5 lg:p-6">
@@ -29,10 +39,12 @@ export function SentimentIndex() {
         </span>
         {data && (
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-bold ${
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-bold transition-opacity duration-200",
               CLASS_COLOR[data.classification] ??
-              "border-black/10 bg-black/[0.03] text-zinc-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300"
-            }`}
+                "border-black/10 bg-black/[0.03] text-zinc-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300",
+              isStale && "opacity-60",
+            )}
           >
             <span className="h-2 w-2 rounded-full bg-current" aria-hidden />
             {data.value} · {data.classification}
@@ -40,20 +52,25 @@ export function SentimentIndex() {
         )}
       </div>
 
-      {isLoading && (
-        <div className="flex flex-1 items-center gap-2 py-3 text-xs text-zinc-500 dark:text-zinc-400">
-          <Loader variant="dots" size={16} />
-          Loading sentiment…
+      <PanelStatus
+        subject="sentiment"
+        loading={isLoading}
+        failure={failure}
+        hasData={Boolean(data)}
+        isRetrying={isRetrying}
+        lastUpdatedAt={lastUpdatedAt}
+        onRetry={retry}
+        className={data ? undefined : "flex-1 justify-center py-3"}
+      />
+
+      {data && (
+        <div
+          aria-busy={isStale || undefined}
+          className={cn("flex flex-1 flex-col transition-opacity duration-200", isStale && "opacity-60")}
+        >
+          <GaugeBar value={data.value} />
         </div>
       )}
-
-      {!isLoading && (error || !data) && (
-        <p className="flex flex-1 items-center py-3 text-xs text-zinc-500 dark:text-zinc-400">
-          Sentiment unavailable right now.
-        </p>
-      )}
-
-      {data && <GaugeBar value={data.value} />}
     </div>
   );
 }
