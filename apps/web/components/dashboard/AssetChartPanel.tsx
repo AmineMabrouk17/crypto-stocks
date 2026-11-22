@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  CHART_TYPES,
   decimalsForPrice,
   formatCurrency,
   formatNumber,
@@ -10,16 +9,17 @@ import {
   type ChartRange,
   type DayStats,
 } from "@crypto-stocks/lib";
-import { Download, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useChartRange } from "@/lib/useChartRange";
 import { useChartType } from "@/lib/useChartType";
-import { SharedLayoutBg } from "../motion/shared-layout-bg";
 import { AnimatedBadge, type AnimatedBadgeStatus } from "../motion/animated-badge";
 import { Loader } from "../motion/loader";
 import { NumberTicker } from "../motion/number-ticker";
+import { ChartExportMenu } from "../chart/ChartExportMenu";
 import { ChartRangeSelector } from "../chart/ChartRangeSelector";
+import { ChartTypeToggle } from "../chart/ChartTypeToggle";
 import { MarketSignals } from "../chart/MarketSignals";
 import { PriceChart, type PriceChartHandle } from "../chart/PriceChart";
 import { useCrypto24hStats } from "../chart/useCrypto24hStats";
@@ -263,42 +263,16 @@ export function AssetChartPanel({
       <div className="relative z-10 flex flex-col gap-4">
         <AssetHeader asset={asset} status={status} price={price} stats={dayStats} statsWindowLabel={statsWindowLabel} />
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded-xl border border-black/5 bg-black/[0.03] p-1 dark:border-white/[0.06] dark:bg-white/[0.04]">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Chart view">
+            <div className="inline-flex items-center gap-1 rounded-xl border border-black/5 bg-black/[0.03] p-1 dark:border-white/[0.06] dark:bg-white/[0.04]">
               <ChartRangeSelector range={range} onChange={setRange} />
             </div>
-            <div className="inline-flex rounded-xl border border-black/5 bg-black/[0.03] p-1 dark:border-white/[0.06] dark:bg-white/[0.04]">
-              <SharedLayoutBg className="flex-row gap-0" pillClassName="bg-primary/[0.12] dark:bg-primary/[0.18]" inset={2}>
-                {CHART_TYPES.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setChartType(t)}
-                    className={`rounded-lg px-2.5 py-1 font-mono text-xs font-medium transition ${
-                      chartType === t
-                        ? "bg-white text-zinc-900 shadow-sm dark:bg-white/20 dark:text-white dark:shadow-none"
-                        : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
-                    }`}
-                  >
-                    {t === "area" ? "Area" : "Candle"}
-                  </button>
-                ))}
-              </SharedLayoutBg>
-            </div>
+            <ChartTypeToggle chartType={chartType} onChange={setChartType} />
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5" role="group" aria-label="Chart actions">
             <PriceAlertPanel asset={asset} price={price} />
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              disabled={!chartHandle}
-              aria-label={`Export ${asset.symbol} chart data as CSV`}
-              title="Export CSV"
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-black/5 bg-black/[0.03] text-zinc-500 transition hover:text-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/[0.06] dark:bg-white/[0.04] dark:text-zinc-400 dark:hover:text-zinc-200"
-            >
-              <Download className="h-3.5 w-3.5" />
-            </button>
+            <ChartExportMenu assetSymbol={asset.symbol} disabled={!chartHandle} onExportCsv={handleExportCsv} />
           </div>
         </div>
 
