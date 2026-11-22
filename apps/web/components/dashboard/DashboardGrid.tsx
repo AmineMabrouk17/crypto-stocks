@@ -192,12 +192,12 @@ export function DashboardGrid() {
           >
             {watchlistVisible ? (
               <>
-                <span className="flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                <span className="flex items-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                   <ListOrdered className="h-3 w-3" />
                   Watchlist
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="rounded-full border border-black/10 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+                  <span className="rounded-full border border-black/10 px-1.5 py-0.5 font-mono text-xs tabular-nums text-zinc-600 dark:border-white/10 dark:text-zinc-400">
                     {watchlist.length}
                   </span>
                   <button
@@ -205,7 +205,7 @@ export function DashboardGrid() {
                     onClick={() => setWatchlistVisible(false)}
                     aria-label="Collapse watchlist sidebar"
                     title="Collapse sidebar"
-                    className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 transition hover:bg-black/5 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-white/10 dark:hover:text-zinc-200"
+                    className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-500 transition hover:bg-black/5 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-zinc-200"
                   >
                     <ChevronsLeft className="h-3.5 w-3.5" />
                   </button>
@@ -217,7 +217,7 @@ export function DashboardGrid() {
                 onClick={() => setWatchlistVisible(true)}
                 aria-label="Expand watchlist sidebar"
                 title="Expand watchlist"
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-zinc-400 transition hover:bg-black/5 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-white/10 dark:hover:text-zinc-200"
+                className="flex h-8 w-8 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-black/5 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-zinc-200"
               >
                 <ChevronsRight className="h-4 w-4" />
               </button>
@@ -302,7 +302,7 @@ export function DashboardGrid() {
             className="glass-tile hidden w-full items-center justify-center gap-2 rounded-3xl px-3 py-3 transition hover:text-zinc-800 dark:hover:text-zinc-200 lg:flex lg:h-full lg:flex-1 lg:flex-col lg:gap-3 lg:px-1"
           >
             <Sparkles className="h-4 w-4 shrink-0" />
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 lg:[writing-mode:vertical-rl] lg:rotate-180">
+            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 lg:[writing-mode:vertical-rl] lg:rotate-180">
               Assistant
             </span>
           </button>

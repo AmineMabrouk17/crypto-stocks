@@ -147,7 +147,7 @@ function LlmSettingsForm({ onClose }: { onClose: () => void }) {
                 setProvider(e.target.value as LlmProvider);
                 resetTransient();
               }}
-              className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/30 dark:border-white/15 dark:bg-zinc-900 dark:focus:border-white/30"
+              className="focus-ring rounded-lg border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/15 dark:bg-zinc-900"
             >
               {(Object.keys(PROVIDER_LABELS) as LlmProvider[]).map((p) => (
                 <option key={p} value={p}>
@@ -170,7 +170,7 @@ function LlmSettingsForm({ onClose }: { onClose: () => void }) {
               placeholder={
                 provider === "gemini" ? "Leave blank to use the app default" : "sk-..."
               }
-              className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/30 dark:border-white/15 dark:bg-zinc-900 dark:focus:border-white/30"
+              className="focus-ring rounded-lg border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/15 dark:bg-zinc-900"
             />
           </label>
 
@@ -184,7 +184,7 @@ function LlmSettingsForm({ onClose }: { onClose: () => void }) {
                 resetTransient();
               }}
               placeholder={MODEL_PLACEHOLDERS[provider]}
-              className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/30 dark:border-white/15 dark:bg-zinc-900 dark:focus:border-white/30"
+              className="focus-ring rounded-lg border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/15 dark:bg-zinc-900"
             />
           </label>
 
@@ -201,7 +201,7 @@ function LlmSettingsForm({ onClose }: { onClose: () => void }) {
                   resetTransient();
                 }}
                 placeholder="https://your-endpoint.example.com/v1"
-                className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/30 dark:border-white/15 dark:bg-zinc-900 dark:focus:border-white/30"
+                className="focus-ring rounded-lg border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/15 dark:bg-zinc-900"
               />
             </label>
           )}
@@ -239,7 +239,7 @@ function LlmSettingsForm({ onClose }: { onClose: () => void }) {
             Use app default
           </button>
           <div className="flex items-center gap-2">
-            {saved && <span className="text-xs text-emerald-600 dark:text-emerald-400">Saved</span>}
+            {saved && <span className="text-xs text-signal-up">Saved</span>}
             <StatefulButton type="button" size="sm" state="idle" onClick={handleSave}>
               Save
             </StatefulButton>

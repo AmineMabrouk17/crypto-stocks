@@ -159,7 +159,7 @@ export function ChatPanel({
                   if (model) selectFreeModel(model);
                 }}
                 aria-label="Select AI model"
-                className="w-36 rounded-lg border border-black/10 bg-white/60 px-2 py-1 font-sans text-xs font-medium text-zinc-800 outline-none transition focus:border-indigo-500/50 dark:border-white/10 dark:bg-zinc-900/90 dark:text-zinc-200 dark:focus:border-indigo-500/60"
+                className="focus-ring w-36 rounded-lg border border-black/10 bg-white/60 px-2 py-1 font-sans text-xs font-medium text-zinc-800 transition dark:border-white/10 dark:bg-zinc-900/90 dark:text-zinc-200"
               >
                 {FREE_MODELS.map((m) => (
                   <option key={m.id} value={m.id} className="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
@@ -179,7 +179,7 @@ export function ChatPanel({
                 onClick={() => setShowClearConfirm(true)}
                 aria-label="Reset chat history"
                 title="Clear conversation"
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-black/5 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-white/10 dark:hover:text-zinc-200"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-black/5 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-zinc-200"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
               </button>
@@ -206,7 +206,7 @@ export function ChatPanel({
               <button
                 type="button"
                 onClick={handleClearChat}
-                className="font-medium text-rose-600 hover:underline dark:text-rose-400"
+                className="font-medium text-signal-down hover:underline"
               >
                 Clear
               </button>
@@ -267,14 +267,14 @@ export function ChatPanel({
         {chatError && (
           <div className="mx-4 mb-2 flex items-center justify-between gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-3 text-xs text-rose-700 sm:mx-5 dark:border-rose-500/30 dark:bg-rose-950/30 dark:text-rose-300">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" />
+              <AlertCircle className="h-4 w-4 shrink-0 text-signal-down" />
               <span>{chatError}</span>
             </div>
             <button
               type="button"
               onClick={() => setChatError(null)}
               aria-label="Dismiss error"
-              className="rounded-lg p-1 text-rose-500 transition hover:bg-rose-500/20"
+              className="rounded-lg p-1 text-signal-down transition hover:bg-rose-500/20"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -293,7 +293,7 @@ export function ChatPanel({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={`Ask about ${displaySymbol(asset)}…`}
-            className="min-w-0 flex-1 rounded-xl border border-black/10 bg-black/[0.03] px-3 py-2 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/40 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-zinc-100 dark:focus:border-indigo-500/60 dark:focus:ring-indigo-500/50"
+            className="focus-ring min-w-0 flex-1 rounded-xl border border-black/10 bg-black/[0.03] px-3 py-2 text-sm text-zinc-900 transition placeholder:text-zinc-500 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-zinc-100"
           />
           <StatefulButton
             type="submit"

@@ -25,7 +25,7 @@ export default function Home() {
             <div className="min-w-0">
               <h1 className="flex items-center gap-2 truncate text-sm font-bold tracking-tight text-zinc-900 dark:text-white">
                 Crypto & Stocks Dashboard
-                <span className="shrink-0 rounded border border-indigo-500/25 bg-indigo-500/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-indigo-500 dark:text-indigo-400">
+                <span className="shrink-0 rounded border border-indigo-500/25 bg-indigo-500/10 px-1.5 py-0.5 font-mono text-xs font-medium text-indigo-700 dark:text-indigo-400">
                   PRO
                 </span>
               </h1>
