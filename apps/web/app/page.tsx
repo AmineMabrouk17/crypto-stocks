@@ -46,7 +46,7 @@ export default function Home() {
               aria-label={watchlistVisible ? "Hide watchlist sidebar" : "Show watchlist sidebar"}
               title={watchlistVisible ? "Hide watchlist" : "Show watchlist"}
               aria-pressed={watchlistVisible}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-white/50 text-zinc-600 shadow-sm transition hover:bg-black/5 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:bg-white/[0.06]"
+              className="hidden h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-white/50 text-zinc-600 shadow-sm transition hover:bg-black/5 lg:flex dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:bg-white/[0.06]"
             >
               {watchlistVisible ? (
                 <PanelLeftClose className="h-4 w-4" />
