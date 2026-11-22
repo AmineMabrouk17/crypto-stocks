@@ -26,26 +26,48 @@ function notify(alert: PriceAlert, price: number) {
 
 /**
  * Mounted once near the app root. Evaluates price alerts for the asset that
- * is currently selected/streaming.
+ * is currently selected/streaming, and records that scope in the alert store.
  *
  * Live price data only exists for one asset at a time — the one the user has
- * open — so alerts for watchlist assets that aren't currently displayed are
- * simply not checked until the user opens them again. This is a deliberate
- * scope limitation, not a bug: streaming every watchlisted asset in the
- * background would require a WebSocket per symbol.
+ * open — and only while this tab is running, so alerts for other assets (or
+ * after the tab closes) are persisted as paused. Streaming every watchlisted
+ * asset in the background would require a WebSocket per symbol and a worker
+ * that outlives the tab; neither exists here, so the panel must not imply it.
  */
 export function PriceAlertWatcher() {
   const { selected, livePrice } = useSelectedAsset();
-  const { alerts, markTriggered } = usePriceAlerts();
+  const { alerts, markTriggered, markChecked, pauseAsset, pauseAllExcept, pauseAll } = usePriceAlerts();
+
+  const assetKind = selected.kind;
+  const assetSymbol = selected.symbol;
+
+  // Leaving this asset (switch, route change, unmount) stops its tracking.
+  useEffect(() => {
+    const asset = { kind: assetKind, symbol: assetSymbol };
+    return () => pauseAsset(asset);
+  }, [assetKind, assetSymbol, pauseAsset]);
+
+  // Alerts for assets that are not open cannot be checked this session. This
+  // covers stale state from a closed/killed tab that never got to persist it.
+  useEffect(() => {
+    pauseAllExcept({ kind: assetKind, symbol: assetSymbol });
+  }, [assetKind, assetSymbol, alerts, pauseAllExcept]);
+
+  // Closing or navigating away ends all tracking before the tab goes.
+  useEffect(() => {
+    const handlePageHide = () => pauseAll();
+    window.addEventListener("pagehide", handlePageHide);
+    return () => window.removeEventListener("pagehide", handlePageHide);
+  }, [pauseAll]);
 
   useEffect(() => {
     if (livePrice == null) return;
 
+    markChecked({ kind: assetKind, symbol: assetSymbol });
+
     const matching = alerts.filter(
       (alert) =>
-        alert.triggeredAt == null &&
-        alert.assetKind === selected.kind &&
-        alert.assetSymbol === selected.symbol,
+        alert.triggeredAt == null && alert.assetKind === assetKind && alert.assetSymbol === assetSymbol,
     );
 
     for (const alert of matching) {
@@ -54,7 +76,7 @@ export function PriceAlertWatcher() {
         notify(alert, livePrice);
       }
     }
-  }, [livePrice, selected, alerts, markTriggered]);
+  }, [livePrice, assetKind, assetSymbol, alerts, markTriggered, markChecked]);
 
   return null;
 }
