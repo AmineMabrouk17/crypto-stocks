@@ -7,11 +7,11 @@ import { Loader } from "../motion/loader";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const CLASS_COLOR: Record<string, string> = {
-  "Extreme Fear": "text-rose-400 border-rose-500/30 bg-rose-500/10",
-  Fear: "text-orange-400 border-orange-500/30 bg-orange-500/10",
-  Neutral: "text-amber-400 border-amber-500/30 bg-amber-500/10",
-  Greed: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
-  "Extreme Greed": "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+  "Extreme Fear": "text-signal-down border-rose-500/30 bg-rose-500/10",
+  Fear: "text-orange-700 border-orange-500/30 bg-orange-500/10 dark:text-orange-400",
+  Neutral: "text-signal-neutral border-amber-500/30 bg-amber-500/10",
+  Greed: "text-signal-up border-emerald-500/30 bg-emerald-500/10",
+  "Extreme Greed": "text-signal-up border-emerald-500/30 bg-emerald-500/10",
 };
 
 export function SentimentIndex() {
@@ -24,7 +24,7 @@ export function SentimentIndex() {
   return (
     <div className="glass-tile flex h-full flex-col gap-3 rounded-3xl p-4 sm:p-5 lg:p-6">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
           Sentiment Index
         </span>
         {data && (
@@ -63,7 +63,7 @@ function GaugeBar({ value }: { value: number }) {
 
   return (
     <div className="flex flex-1 items-center gap-2 py-3">
-      <span className="font-mono text-[10px] font-semibold text-rose-400">0</span>
+      <span className="font-mono text-xs font-semibold text-signal-down">0</span>
       <div className="relative h-3 flex-1 rounded-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 p-[1px] shadow-inner">
         <div className="h-full w-full rounded-full bg-white/60 dark:bg-[#0d101a]/40" />
         <span
@@ -72,7 +72,7 @@ function GaugeBar({ value }: { value: number }) {
           style={{ left: `${clamped}%` }}
         />
       </div>
-      <span className="font-mono text-[10px] font-semibold text-emerald-400">100</span>
+      <span className="font-mono text-xs font-semibold text-signal-up">100</span>
     </div>
   );
 }

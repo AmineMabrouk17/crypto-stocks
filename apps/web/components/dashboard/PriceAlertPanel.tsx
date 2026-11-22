@@ -69,7 +69,7 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
       >
         <Bell className="h-3.5 w-3.5" />
         {activeAlerts.length > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-black/5 bg-indigo-600 px-1 text-[9px] font-semibold leading-none text-white dark:border-white/10">
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border border-black/5 bg-indigo-600 px-1 text-xs font-semibold leading-none text-white dark:border-white/10">
             {activeAlerts.length}
           </span>
         )}
@@ -91,7 +91,7 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
                   price != null ? formatCurrency(price, decimalsForPrice(price)) : "Target price"
                 }
                 aria-label="Target price"
-                className="w-full min-w-0 rounded-lg border border-black/10 bg-black/[0.03] px-2 py-1.5 font-mono text-sm outline-none transition focus:border-emerald-500/50 dark:border-white/15 dark:bg-white/[0.04] dark:focus:border-emerald-500/60"
+                className="focus-ring w-full min-w-0 rounded-lg border border-black/10 bg-black/[0.03] px-2 py-1.5 font-mono text-sm transition dark:border-white/15 dark:bg-white/[0.04]"
               />
               <div className="flex shrink-0 overflow-hidden rounded-lg border border-black/10 dark:border-white/15">
                 <button
@@ -101,7 +101,7 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
                   title="Alert when price rises above target"
                   className={`flex items-center gap-1 px-2 py-1.5 text-xs ${
                     direction === "above"
-                      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                      ? "bg-emerald-500/15 text-signal-up"
                       : "text-zinc-500 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/10"
                   }`}
                 >
@@ -114,7 +114,7 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
                   title="Alert when price falls below target"
                   className={`flex items-center gap-1 border-l border-black/10 px-2 py-1.5 text-xs dark:border-white/15 ${
                     direction === "below"
-                      ? "bg-red-500/15 text-red-600 dark:text-red-400"
+                      ? "bg-red-500/15 text-signal-down"
                       : "text-zinc-500 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/10"
                   }`}
                 >
@@ -134,7 +134,7 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
             </StatefulButton>
 
             {(permission === "denied" || permission === "unsupported") && (
-              <div className="flex items-start gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[11px] leading-snug text-amber-700 dark:text-amber-400">
+              <div className="flex items-start gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[11px] leading-snug text-signal-neutral">
                 <BellOff className="mt-0.5 h-3 w-3 shrink-0" />
                 <span>
                   {permission === "denied"
@@ -154,9 +154,9 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
                 >
                   <span className="flex items-center gap-1.5 font-mono">
                     {alert.direction === "above" ? (
-                      <TrendingUp className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                      <TrendingUp className="h-3 w-3 text-signal-up" />
                     ) : (
-                      <TrendingDown className="h-3 w-3 text-red-600 dark:text-red-400" />
+                      <TrendingDown className="h-3 w-3 text-signal-down" />
                     )}
                     {formatCurrency(alert.targetPrice, decimalsForPrice(alert.targetPrice))}
                   </span>
@@ -164,7 +164,7 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
                     type="button"
                     onClick={() => removeAlert(alert.id)}
                     aria-label={`Remove alert at ${alert.targetPrice}`}
-                    className="rounded px-1 text-zinc-400 hover:bg-black/10 hover:text-zinc-700 dark:hover:bg-white/10 dark:hover:text-zinc-200"
+                    className="rounded px-1 text-zinc-500 hover:bg-black/10 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-zinc-200"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -173,7 +173,7 @@ export function PriceAlertPanel({ asset, price }: { asset: AssetRef; price: numb
             </ul>
           )}
 
-          <p className="mt-2 text-[10px] leading-snug text-zinc-400 dark:text-zinc-500">
+          <p className="mt-2 text-[11px] leading-snug text-zinc-500 dark:text-zinc-400">
             {`Alerts only trigger while ${asset.symbol} is the asset currently open — this app doesn't monitor prices in the background.`}
           </p>
         </div>

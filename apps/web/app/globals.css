@@ -16,6 +16,13 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* Paired signal colours: each token resolves to the palette shade that clears
+     4.5:1 against its own theme's surface, so components never hard-code a
+     dark-mode shade on a light background. Light = *-700, dark = *-400. */
+  --color-signal-up: var(--signal-up);
+  --color-signal-down: var(--signal-down);
+  --color-signal-neutral: var(--signal-neutral);
+  --color-focus-ring: var(--focus-ring);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-heading: var(--font-sans);
@@ -90,6 +97,13 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Signal text on light surfaces: emerald-700 / rose-700 / amber-700.
+     Ratios on white: 5.36 / 6.03 / 5.03 (all >= 4.5:1). */
+  --signal-up: oklch(0.508 0.118 165.612);
+  --signal-down: oklch(0.514 0.222 16.935);
+  --signal-neutral: oklch(0.555 0.163 48.998);
+  /* indigo-600 clears 6.46:1 on white and stays distinct from the signal hues. */
+  --focus-ring: oklch(0.511 0.262 276.966);
 }
 
 .dark {
@@ -124,9 +138,31 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  /* Signal text on dark surfaces: emerald-400 / rose-400 / amber-400, the shades
+     the components used before the tokens existed, so dark mode is unchanged. */
+  --signal-up: oklch(0.765 0.177 163.223);
+  --signal-down: oklch(0.712 0.194 13.428);
+  --signal-neutral: oklch(0.828 0.189 84.429);
+  /* indigo-400 clears 6.36:1 on the bento background. */
+  --focus-ring: oklch(0.673 0.182 276.935);
+}
+
+@layer base {
+  /* Keyboard focus is always visible. Text inputs and buttons opt into the
+     stronger `.focus-ring` treatment below; this catches everything else. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
 }
 
 @layer components {
+  /* A visible 2px focus ring (>= 3:1 against the surface) for inputs, selects
+     and buttons that used to signal focus with a border colour change only. */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
   .glass-tile {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     background: rgb(255 255 255 / 0.78);

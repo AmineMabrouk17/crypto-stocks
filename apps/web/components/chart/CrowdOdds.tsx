@@ -52,7 +52,7 @@ export function CrowdOdds({ symbol }: { symbol: string }) {
   return (
     <div className="glass-tile flex h-full flex-col gap-3 rounded-3xl p-4 sm:p-5 lg:p-6">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
           Crowd Odds
         </span>
         <div className="inline-flex rounded-xl border border-black/10 bg-black/[0.03] p-0.5 dark:border-white/10 dark:bg-white/[0.04]">
@@ -62,7 +62,7 @@ export function CrowdOdds({ symbol }: { symbol: string }) {
               type="button"
               onClick={() => setHorizon(h)}
               className={cn(
-                "rounded-lg px-2.5 py-1 font-mono text-[11px] font-semibold tabular-nums transition",
+                "rounded-lg px-2.5 py-1 font-mono text-xs font-semibold tabular-nums transition",
                 h === horizon
                   ? "bg-white text-zinc-900 shadow-sm dark:bg-white/20 dark:text-white dark:shadow-none"
                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200",
@@ -114,11 +114,11 @@ function SplitBar({ up, down }: { up: number; down: number }) {
   return (
     <div className="flex flex-1 flex-col justify-center gap-2.5 py-1">
       <div className="flex items-baseline justify-between gap-2 font-mono">
-        <span className="flex items-center gap-1.5 text-base font-bold text-emerald-600 dark:text-emerald-400">
+        <span className="flex items-center gap-1.5 text-base font-bold text-signal-up">
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-glow-emerald" aria-hidden />
           Up {upPct}%
         </span>
-        <span className="flex items-center gap-1.5 text-base font-bold text-rose-600 dark:text-rose-400">
+        <span className="flex items-center gap-1.5 text-base font-bold text-signal-down">
           {downPct}% Down
           <span className="h-2.5 w-2.5 rounded-full bg-rose-500" aria-hidden />
         </span>

@@ -58,7 +58,7 @@ export function NewsFeed({ asset }: { asset: AssetRef }) {
           <h3 className="font-bold tracking-tight text-zinc-900 dark:text-white">News for {asset.name}</h3>
         </div>
         {articles.length > 0 && (
-          <span className="rounded-full border border-black/10 px-2 py-0.5 font-mono text-[10px] tabular-nums text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+          <span className="rounded-full border border-black/10 px-2 py-0.5 font-mono text-xs tabular-nums text-zinc-600 dark:border-white/10 dark:text-zinc-400">
             {articles.length} stories
           </span>
         )}
@@ -95,7 +95,7 @@ export function NewsFeed({ asset }: { asset: AssetRef }) {
                       href={article.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-semibold leading-snug text-zinc-800 transition-colors hover:text-emerald-600 dark:text-zinc-100 dark:hover:text-emerald-400"
+                      className="font-semibold leading-snug text-zinc-800 transition-colors hover:text-signal-up dark:text-zinc-100"
                     >
                       {article.title}
                     </a>

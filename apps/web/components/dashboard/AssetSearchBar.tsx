@@ -112,7 +112,7 @@ export function AssetSearchBar() {
   return (
     <div className="relative">
       <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400 transition-colors focus-within:text-emerald-500">
+        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500 transition-colors focus-within:text-signal-up dark:text-zinc-400">
           <Search className="h-4 w-4" />
         </span>
         <input
@@ -126,10 +126,10 @@ export function AssetSearchBar() {
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder="Search coin or ticker (e.g. doge, aapl)"
-          className="w-full rounded-xl border border-black/10 bg-black/[0.03] py-2 pl-9 pr-12 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/40 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-zinc-100"
+          className="focus-ring w-full rounded-xl border border-black/10 bg-black/[0.03] py-2 pl-9 pr-12 text-sm text-zinc-900 transition placeholder:text-zinc-500 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-zinc-100"
         />
         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
-          <kbd className="rounded border border-black/10 bg-white/60 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-zinc-500">
+          <kbd className="rounded border border-black/10 bg-white/60 px-1.5 py-0.5 font-mono text-[11px] text-zinc-500 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-zinc-400">
             ⌘K
           </kbd>
         </span>
@@ -149,7 +149,7 @@ export function AssetSearchBar() {
                   e.preventDefault();
                   setCategory(c.value);
                 }}
-                className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
+                className={`focus-ring rounded-lg px-2.5 py-1 text-xs font-medium transition ${
                   category === c.value
                     ? "bg-white text-zinc-900 shadow-sm dark:bg-white/20 dark:text-white dark:shadow-none"
                     : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
@@ -160,10 +160,10 @@ export function AssetSearchBar() {
             ))}
           </SharedLayoutBg>
           {loading && filteredResults.length === 0 && (
-            <div className="px-3 py-2 font-mono text-xs text-zinc-500">Searching…</div>
+            <div className="px-3 py-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">Searching…</div>
           )}
           {!loading && filteredResults.length === 0 && (
-            <div className="px-3 py-2 font-mono text-xs text-zinc-500">No matches</div>
+            <div className="px-3 py-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">No matches</div>
           )}
           {filteredResults.map((r) => (
             <button
@@ -172,7 +172,7 @@ export function AssetSearchBar() {
               onMouseDown={() => handleSelect(r)}
               className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-emerald-500/[0.06] dark:hover:bg-emerald-500/[0.08]"
             >
-              <span className="rounded-full border border-black/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+              <span className="rounded-full border border-black/10 px-1.5 py-0.5 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:border-white/10 dark:text-zinc-400">
                 {r.kind}
               </span>
               <span className="font-mono font-semibold uppercase text-zinc-900 dark:text-zinc-100">
