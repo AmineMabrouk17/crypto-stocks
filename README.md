@@ -32,6 +32,12 @@
 
 ---
 
+## ▶ Launch film
+
+[![Watch the 60-second launch film](docs/brag/poster-en.jpg)](docs/brag/launch-film-en.mp4)
+
+60 seconds · English · [Arabic version](docs/brag/launch-film-ar.mp4)
+
 ## 📈 Overview
 
 **Crypto & Stocks Dashboard** is a real-time market terminal that tracks **cryptocurrencies, stocks, and ETFs** side by side — no account, no API keys, and no database required.
